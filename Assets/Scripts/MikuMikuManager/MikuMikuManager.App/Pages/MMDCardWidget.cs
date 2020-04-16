@@ -58,6 +58,10 @@ namespace MikuMikuManager.App
                             new IconButton(
                                 icon:new Icon(Icons.delete),
                                 onPressed:()=>{ }
+                            ),
+                            new IconButton(
+                                icon:new Icon(Icons.open_in_browser),
+                                onPressed:()=>System.Diagnostics.Process.Start(path.Remove(path.LastIndexOf("\\")))
                             )
                         }
                     )
@@ -79,14 +83,8 @@ namespace MikuMikuManager.App
                         buttonGroup
                     }
                 );
-            var detect = new GestureDetector(
-                    child: stack,
-                    onTap: () =>
-                    {
-                        System.Diagnostics.Process.Start(path.Remove(path.LastIndexOf("\\")));
-                    }
-                );
-            return detect;
+
+            return stack;
         }
 
         protected override bool wantKeepAlive => true;
