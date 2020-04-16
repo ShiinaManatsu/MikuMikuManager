@@ -36,7 +36,10 @@ namespace MikuMikuManager.Services
         }
 
         public ReactiveCollection<string> WatchedFolders { get; set; }
+
         public ReactiveCollection<MMDObject> ObservedMMDObjects { get; set; }
+
+        public AppSettingsXML AppSettings { get; private set; }
 
         #region Private Members
 
@@ -49,6 +52,7 @@ namespace MikuMikuManager.Services
             WatchedFolders = new ReactiveCollection<string>();
             ObservedMMDObjects = new ReactiveCollection<MMDObject>();
             ObservableSettings();
+            SetupSettings();
         }
 
         private void ObservableSettings()
@@ -87,6 +91,24 @@ namespace MikuMikuManager.Services
 
         }
 
+        private void SetupSettings()
+        {
+            // Load at first time
+            AppSettings = AppSettingsXML.LoadAppSettingsXML();
+            if (AppSettings.WatchedFolders.Length > 0)
+            {
+                foreach (var s in AppSettings.WatchedFolders)
+                {
+                    WatchedFolders.Add(s);
+                }
+            }
+
+            // Subscribe to event
+            WatchedFolders.ObserveCountChanged()
+                .Do(_ => AppSettings.WatchedFolders = WatchedFolders.ToArray())
+                .Subscribe(_ => AppSettings.SaveToXML());
+        }
+
         private void GetMMDObgects(string path)
         {
             var pmxs = Directory
@@ -96,21 +118,6 @@ namespace MikuMikuManager.Services
                 .Select(x => new MMDObject(x, x.Remove(x.LastIndexOf("/")), path))
                 .Subscribe(x => ObservedMMDObjects.Add(x));
         }
-
-        //public async void ScanFolder()
-        //{
-
-        //}
-
-        //public async void LoadDB()
-        //{
-
-        //}
-
-        //public async void SaveDB()
-        //{
-
-        //}
     }
 
 }

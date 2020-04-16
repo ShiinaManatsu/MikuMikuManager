@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
+using MikuMikuManager.Services;
 
 namespace MikuMikuManager.Data
 {
@@ -36,18 +37,27 @@ namespace MikuMikuManager.Data
         public string WatchedFolder { get; private set; }
 
         /// <summary>
+        /// Is this mmd object being favored
+        /// </summary>
+        public ReactiveProperty<bool> IsFavored { get; set; }
+
+        /// <summary>
         /// Constructor for the mmd objects
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <param name="rootPath">Root path of this file</param>
         /// <param name="friendlyName">Friendly name</param>
-        public MMDObject(string fileName, string rootPath, string watchedFolder,string friendlyName = "")
+        public MMDObject(string fileName, string rootPath, string watchedFolder, string friendlyName = "")
         {
             FileName = fileName;
             FriendlyName = new ReactiveProperty<string>(friendlyName);
             RootPath = rootPath;
             WatchedFolder = watchedFolder;
             Tags = new ReactiveCollection<Tag>();
+            IsFavored = new ReactiveProperty<bool>(MMDObjectXML.LoadMMDObjectXML(this).IsFavored);
+
+            IsFavored.ObserveEveryValueChanged(x => x.Value)
+                .Subscribe(x => MMDObjectXML.SaveToXML(this));
         }
     }
 
