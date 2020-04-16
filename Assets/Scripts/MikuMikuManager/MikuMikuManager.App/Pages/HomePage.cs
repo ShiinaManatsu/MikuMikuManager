@@ -13,6 +13,7 @@
     using Material = Unity.UIWidgets.material.Material;
     using Unity.UIWidgets.painting;
     using Unity.UIWidgets.rendering;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the <see cref="HomePage" />.
@@ -42,6 +43,9 @@
         internal List<MMDObject> mMDObjects;
 
         protected override bool wantKeepAlive => true;
+        private readonly string alertTitle = "感谢尝试Alpha版本的MikuMikuManager!";
+        private readonly string alertContent = "当前预览需要配合MikuMikuPreview或者将预览文件命名为\"模型名字\".pmx.png并与pmx文件放在同一目录";
+
 
         /// <summary>
         /// The build.
@@ -63,7 +67,7 @@
                         mainAxisSpacing: 8,
                         childAspectRatio: 0.5f,
                         crossAxisCount: (int)(MediaQuery.of(context).size.width / 230f),
-                        children: mMDObjects.ConvertAll<Widget>(x => new MMDCardWidget(x))
+                        children: mMDObjects.ConvertAll<Widget>(x => new MMDCardWidget(ref x))
                     )
                 );
             }
@@ -78,6 +82,21 @@
             countChanged = MMMServices.Instance.ObservedMMDObjects.ObserveCountChanged(true)
                 .Do(x => Debug.Log($"Current count {x}"))
                 .Subscribe(_ => setState(() => mMDObjects = MMMServices.Instance.ObservedMMDObjects.ToList()));
+            Task.Run(() =>
+            {
+                Task.Delay(TimeSpan.FromSeconds(3));
+                Unity.UIWidgets.material.DialogUtils.showDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (c) => new AlertDialog(
+                             title: new Text(alertTitle),
+                             content: new Text(alertContent),
+                             actions: new List<Widget>
+                             {
+                                new RaisedButton(child:new Text("Close",style:new TextStyle(color:Colors.white)),onPressed:()=>Navigator.of(c).pop())
+                             }
+                         ));
+            });
         }
 
         /// <summary>
