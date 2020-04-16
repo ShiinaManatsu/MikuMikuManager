@@ -10,13 +10,15 @@ using Unity.UIWidgets.widgets;
 using Material = Unity.UIWidgets.material.Material;
 using Unity.UIWidgets.painting;
 using Unity.UIWidgets.rendering;
+using UnityEngine;
+using System.Threading.Tasks;
 
 namespace MikuMikuManager.App
 {
     public class MMDCardWidget : StatefulWidget
     {
         public MMDObject MMDObject { get; private set; }
-        public MMDCardWidget(MMDObject mMDObject)
+        public MMDCardWidget(ref MMDObject mMDObject)
         {
             MMDObject = mMDObject;
         }
@@ -26,6 +28,16 @@ namespace MikuMikuManager.App
 
     public class MMDCardWidgetState : AutomaticKeepAliveClientMixin<MMDCardWidget>
     {
+        private bool isFavored;
+
+        public override void initState()
+        {
+            base.initState();
+            isFavored = widget.MMDObject.IsFavored.Value;
+            widget.MMDObject.IsFavored.ObserveEveryValueChanged(x => x.Value)
+                .Subscribe(x => setState(() => isFavored = x));
+        }
+
         public override Widget build(BuildContext context)
         {
             var path = $"{widget.MMDObject.FileName}.png";
@@ -34,12 +46,14 @@ namespace MikuMikuManager.App
                     child: new Container(
                         decoration: new BoxDecoration(color: Colors.white70),
                         child: new ButtonBar(
+                            alignment: MainAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.max,
                         children: new List<Widget>
                         {
                             new IconButton(
-                                icon:new Icon(Icons.favorite),
-                                onPressed:()=>{ },
-                                tooltip:"Favorite"
+                                icon:new Icon(isFavored?Icons.favorite:Icons.favorite_border,
+                                color:isFavored?Colors.pinkAccent:null),
+                                onPressed:()=> widget.MMDObject.IsFavored.Value=!widget.MMDObject.IsFavored.Value
                             ),
                             new IconButton(
                                 icon:new Icon(Icons.delete),
@@ -48,7 +62,7 @@ namespace MikuMikuManager.App
                         }
                     )
                         )
-                );
+                ); ; ;
 
             var card = File.Exists(path) ? new Card(
                     color: Colors.amber,
