@@ -79,9 +79,14 @@
         public override void initState()
         {
             base.initState();
-            countChanged = MMMServices.Instance.ObservedMMDObjects.ObserveCountChanged(true)
-                .Do(x => Debug.Log($"Current count {x}"))
+            var observeCountChanged = MMMServices.Instance.ObservedMMDObjects.ObserveCountChanged(true).Select(x=>true);
+            var observeMove = MMMServices.Instance.ObservedMMDObjects.ObserveMove().Select(x => true);
+
+            countChanged = observeCountChanged.Merge(observeMove)
+                .Do(_=>Debug.Log($"Objects changed, count: {MMMServices.Instance.ObservedMMDObjects.Count}"))
                 .Subscribe(_ => setState(() => mMDObjects = MMMServices.Instance.ObservedMMDObjects.ToList()));
+
+
             Task.Run(() =>
             {
                 Task.Delay(TimeSpan.FromSeconds(3));
