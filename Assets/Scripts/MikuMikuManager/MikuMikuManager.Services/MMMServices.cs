@@ -11,9 +11,10 @@ using System;
 namespace MikuMikuManager.Services
 {
 
-    public class MMMServices
+    public class MMMServices : MonoBehaviour
     {
         private static MMMServices instance = null;
+        private static GameObject container;
 
         /// <summary>
         /// Static instances
@@ -22,9 +23,9 @@ namespace MikuMikuManager.Services
         {
             get
             {
-                if (instance == null)
+                if (instance is null)
                 {
-                    Instance = new MMMServices();
+                    Instance = container.AddComponent<MMMServices>();
                     return instance;
                 }
                 else
@@ -32,7 +33,7 @@ namespace MikuMikuManager.Services
                     return instance;
                 }
             }
-            private set => instance = value;
+            set => instance = value;
         }
 
         public ReactiveCollection<string> WatchedFolders { get; set; }
@@ -51,6 +52,11 @@ namespace MikuMikuManager.Services
         {
             WatchedFolders = new ReactiveCollection<string>();
             ObservedMMDObjects = new ReactiveCollection<MMDObject>();
+        }
+
+        private void Start()
+        {
+            container = transform.gameObject;
             ObservableSettings();
             SetupSettings();
         }
@@ -74,15 +80,9 @@ namespace MikuMikuManager.Services
             // Handle remove
             var folderRemove = WatchedFolders.ObserveRemove();
 
-            folderRemove.Subscribe(x => ObservedMMDObjects
-                .Where(m => m.WatchedFolder == x.Value)
-                .ToObservable()
-                .Delay(TimeSpan.FromMilliseconds(100))
-                .Subscribe(o =>
-                {
-                    var result = ObservedMMDObjects.Remove(o);
-                    Debug.Log(result);
-                }));
+            folderRemove
+            .SelectMany(x => ObservedMMDObjects.ToList().Where(f => f.WatchedFolder == x.Value))
+            .Subscribe(x => ObservedMMDObjects.Remove(x));
 
             //folderRemove.Select(x => FileSystemWatchers.Where(f => f.Path == x.Value).FirstOrDefault())
             //    .Do(x => x.Dispose())
