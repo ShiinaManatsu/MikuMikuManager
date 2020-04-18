@@ -88,7 +88,13 @@
         {
             base.initState();
             observeCountChanged = MMMServices.Instance.WatchedFolders.ObserveCountChanged(true)
-                .Subscribe(x => setState(() => chips = MMMServices.Instance.WatchedFolders.Select(f => new Chip(label: new Text(f), deleteIcon: new Icon(Icons.delete), onDeleted: () => MMMServices.Instance.WatchedFolders.Remove(f))).ToList()));
+                .Subscribe(x => setState(() =>
+                    chips = MMMServices.Instance.WatchedFolders
+                        .Select(f => new Chip(
+                            label: new Text(f), 
+                            deleteIcon: new Icon(Icons.delete), 
+                            onDeleted: () => MMMServices.Instance.WatchedFolders.Remove(f)))
+                        .ToList()));
             Debug.Log(chips.Count);
         }
 
