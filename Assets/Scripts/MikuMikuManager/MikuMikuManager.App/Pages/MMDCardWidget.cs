@@ -64,15 +64,6 @@ namespace MikuMikuManager.App
                             new AspectRatio(
                                     child:
                                     new FlatButton(
-                                        child:new Icon(Icons.delete),
-                                        onPressed:()=>{
-
-                                        }
-                                    )
-                                ),
-                            new AspectRatio(
-                                    child:
-                                    new FlatButton(
                                         child:new Icon(Icons.open_in_browser),
                                         onPressed:()=>System.Diagnostics.Process.Start(path.Remove(path.LastIndexOf("\\")))
                                     )
@@ -109,6 +100,7 @@ namespace MikuMikuManager.App
         {
             if (UIClickProperty.IsMRBClicked)
             {
+                Debug.Log(context);
                 PopupMenuUtils.showMenu(
                     context: context,
                     position: RelativeRect.fromLTRB(Input.mousePosition.x, Screen.height - Input.mousePosition.y, Screen.width - Input.mousePosition.x, Input.mousePosition.y),
