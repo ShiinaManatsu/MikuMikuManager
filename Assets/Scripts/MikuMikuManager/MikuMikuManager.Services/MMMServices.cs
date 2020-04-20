@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿//#define DEBUG
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
@@ -7,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Globalization;
 using System;
+using UniRx.Diagnostics;
 
 namespace MikuMikuManager.Services
 {
@@ -82,7 +85,8 @@ namespace MikuMikuManager.Services
 
             folderRemove
             .SelectMany(x => ObservedMMDObjects.ToList().Where(f => f.WatchedFolder == x.Value))
-            .Subscribe(x => ObservedMMDObjects.Remove(x));
+            .ForEachAsync(x => ObservedMMDObjects.Remove(x))
+            .Subscribe(x => { }, onError: e => Debug.Log(e));
 
             //folderRemove.Select(x => FileSystemWatchers.Where(f => f.Path == x.Value).FirstOrDefault())
             //    .Do(x => x.Dispose())
@@ -104,6 +108,7 @@ namespace MikuMikuManager.Services
             }
 
             // Subscribe to event
+            // Ignore the first time save
             WatchedFolders.ObserveCountChanged()
                 .Do(_ => AppSettings.WatchedFolders = WatchedFolders.ToArray())
                 .Subscribe(_ => AppSettings.SaveToXML());
@@ -115,8 +120,14 @@ namespace MikuMikuManager.Services
                 .EnumerateFiles(path, "*.*", SearchOption.AllDirectories).Where(s => Path.GetExtension(s).EndsWith(".pmx", true, CultureInfo.CurrentCulture));
 
             pmxs.ToObservable()
-                .Select(x => new MMDObject(x, x.Remove(x.LastIndexOf("/")), path))
-                .Subscribe(x => ObservedMMDObjects.Add(x));
+                .ForEachAsync(x =>
+                    {
+                        var obj = new MMDObject(x, x.Remove(x.LastIndexOf("/")), path);
+                        ObservedMMDObjects.Add(obj);
+                    }
+                )
+                .Debug()
+                .Subscribe(x => { }, onError: e => Debug.Log(e));
         }
     }
 
