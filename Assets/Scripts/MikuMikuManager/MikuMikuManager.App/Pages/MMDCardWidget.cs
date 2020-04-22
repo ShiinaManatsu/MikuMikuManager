@@ -18,9 +18,11 @@ namespace MikuMikuManager.App
     public class MMDCardWidget : StatefulWidget
     {
         public MMDObject MMDObject { get; private set; }
-        public MMDCardWidget(ref MMDObject mMDObject)
+        public Action<MMDObject,bool> FavoriteCallback { get; set; }
+        public MMDCardWidget(MMDObject mMDObject, Action<MMDObject, bool> callback)
         {
             MMDObject = mMDObject;
+            FavoriteCallback = callback;
         }
 
         public override State createState() => new MMDCardWidgetState();
@@ -28,14 +30,9 @@ namespace MikuMikuManager.App
 
     public class MMDCardWidgetState : AutomaticKeepAliveClientMixin<MMDCardWidget>
     {
-        private bool isFavored;
-
         public override void initState()
         {
             base.initState();
-            isFavored = widget.MMDObject.IsFavored.Value;
-            widget.MMDObject.IsFavored.ObserveEveryValueChanged(x => x.Value)
-                .Subscribe(x => setState(() => isFavored = x));
         }
 
         public override Widget build(BuildContext context)
@@ -53,12 +50,20 @@ namespace MikuMikuManager.App
                         mainAxisSize: MainAxisSize.max,
                         children: new List<Widget>
                         {
+                            new Padding(
+                                padding:EdgeInsets.symmetric(3),
+                                child:new Center(
+                                    child:new Text($"{widget.MMDObject.FileName}")
+                                    )
+                                ),
                             new AspectRatio(
                                     child:
                                     new FlatButton(
-                                        child:new Icon(isFavored?Icons.favorite:Icons.favorite_border,
-                                        color:isFavored?Colors.pinkAccent:null),
-                                        onPressed:()=> widget.MMDObject.IsFavored.Value=!widget.MMDObject.IsFavored.Value
+                                        child:new Icon(widget.MMDObject.IsFavored.Value?Icons.favorite:Icons.favorite_border,
+                                        color:widget.MMDObject.IsFavored.Value?Colors.pinkAccent:null),
+                                        onPressed:()=> {
+                                            widget.FavoriteCallback(widget.MMDObject,!widget.MMDObject.IsFavored.Value);
+                                        }
                                     )
                                 ),
                             new AspectRatio(
@@ -72,6 +77,8 @@ namespace MikuMikuManager.App
                     )
                 )
             ); ; ;
+
+
 
             var card = new GestureDetector(
                     child: File.Exists(path) ? new Card(

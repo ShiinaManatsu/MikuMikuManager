@@ -37,10 +37,11 @@
         /// </summary>
         internal IDisposable countChanged;
 
-        /// <summary>
-        /// Defines the mMDObjects.
-        /// </summary>
-        internal List<MMDObject> mMDObjects;
+        #region Private state
+        private SortType SortType { get; set; } = SortType.ByDefault;
+        private string SearchPattern = "";
+        private List<MMDObject> mMDObjects;
+        #endregion
 
         protected override bool wantKeepAlive => true;
         private readonly string alertTitle = "感谢尝试Alpha版本的MikuMikuManager!";
@@ -67,9 +68,30 @@
                         mainAxisSpacing: 8,
                         childAspectRatio: 0.5f,
                         crossAxisCount: (int)(MediaQuery.of(context).size.width / 230f),
-                        children: mMDObjects.ConvertAll<Widget>(x => new MMDCardWidget(ref x))
-                    )
-                );
+                        children: CardFilter()
+                ));
+            }
+        }
+
+        private Widget BuildCard(MMDObject x) => new MMDCardWidget(x, (m, b) =>
+        {
+            if (mounted) { setState(() => mMDObjects.Find(o => o.FilePath == m.FilePath).IsFavored.Value = b); }
+        });
+
+        private List<Widget> CardFilter()
+        {
+            if (SearchPattern != "")
+            {
+                var s = SearchPattern.Trim().Split(' ');
+                return SortType == SortType.ByDefault ?
+                            mMDObjects.Where(x => s.Any(p => x.FileName.Contains(p))).OrderBy(x => x.FilePath).Select(x => BuildCard(x)).ToList()
+                            : mMDObjects.Where(x => s.Any(p => x.FileName.Contains(p))).OrderByDescending(x => x.IsFavored.Value).Select(x => BuildCard(x)).ToList();
+            }
+            else
+            {
+                return SortType == SortType.ByDefault ?
+                            mMDObjects.OrderBy(x => x.FilePath).Select(x => BuildCard(x)).ToList()
+                            : mMDObjects.OrderByDescending(x => x.IsFavored.Value).Select(x => BuildCard(x)).ToList();
             }
         }
 
@@ -82,9 +104,35 @@
             var observeCountChanged = MMMServices.Instance.ObservedMMDObjects.ObserveCountChanged(true).Select(x=>true);
             var observeMove = MMMServices.Instance.ObservedMMDObjects.ObserveMove().Select(x => true);
 
-            countChanged = observeCountChanged.Merge(observeMove)
-                .Do(_=>Debug.Log($"Objects changed, count: {MMMServices.Instance.ObservedMMDObjects.Count}"))
-                .Subscribe(_ => setState(() => mMDObjects = MMMServices.Instance.ObservedMMDObjects.ToList()));
+            #region Subscription
+
+            // Objects event
+            var mmm = MMMServices.Instance;
+
+            var observeEvery = mmm.ObservedMMDObjects.ObserveEveryValueChanged(x => x).Select(x => true);
+            var observeCountChanged = mmm.ObservedMMDObjects.ObserveCountChanged(true).Select(x => true);
+            var observeMove = mmm.ObservedMMDObjects.ObserveMove().Select(x => true);
+
+            countChanged = observeCountChanged.Merge(observeMove, observeEvery)
+                .Subscribe(_ => setState(() => mMDObjects = mmm.ObservedMMDObjects.ToList())
+                , onError: e => Debug.Log(e.Message));
+
+            // Sort event
+            MMMFlutterApp.SortTypeProperty
+                .DistinctUntilChanged()
+                .Subscribe(x => setState(() => SortType = x), onError: e => Debug.Log(e.Message));
+
+            // Search pattern changed event
+            MMMFlutterApp.SearchPattern
+                .Throttle(TimeSpan.FromMilliseconds(100))
+                .DistinctUntilChanged()
+                .Subscribe(x =>
+                {
+                    using (WindowProvider.of(GameObject.Find("Panel")).getScope())
+                    {
+                        setState(() => SearchPattern = x);
+                    }
+                });
 
 
             Task.Run(() =>

@@ -25,6 +25,7 @@ namespace MikuMikuManager.App {
         const string homePage = "/";
         const string previewPage = "/Preview";
         static TextEditingController controller = new TextEditingController ();
+        public static ReactiveProperty<string> SearchPattern { get; set; } = new ReactiveProperty<string>(string.Empty);
 
         public static ReactiveProperty<SortType> SortTypeProperty;
 
@@ -81,29 +82,31 @@ namespace MikuMikuManager.App {
                                                 hintText: "Search..."
                                             ),
                                             autofocus : false,
-                                            //onChanged: onChanged,
-                                            //onSubmitted: onSubmitted,
-                                            //onTap: onTap,
-                                            style : new TextStyle (fontSize: 17)
+                                            style : new TextStyle (fontSize: 17),
+                                            onSubmitted:x=>SearchPattern.Value=x
                                         )),
                                     new PopupMenuButton<SortType>(
-                                            itemBuilder:_=>new List<PopupMenuEntry<SortType>>
-                                            {
-                                                new PopupMenuItem<SortType> (
-                                                    value: SortType.ByDefault,
-                                                    child: new Text("By Default")
-                                                ),
-                                                new PopupMenuItem<SortType> (
-                                                    value: SortType.ByDefault,
-                                                    child: new Text("By Favorite")
-                                                ),
-                                            },
-                                            onSelected:x=>SortTypeProperty.Value=x
-                                        )
-                                }
-                            )
-                        )
-
+                                        child:new Icon(Icons.sort),
+                                        itemBuilder:_=>new List<PopupMenuEntry<SortType>>
+                                        {
+                                            new PopupMenuItem<SortType> (
+                                                value: SortType.ByDefault,
+                                                child: new Text("By Default")
+                                            ),
+                                            new PopupMenuItem<SortType> (
+                                                value: SortType.ByFavorite,
+                                                child: new Text("By Favorite")
+                                            ),
+                                        },
+                                        initialValue:SortTypeProperty.Value,
+                                        onSelected: x =>
+                                        {
+                                            SortTypeProperty.Value=x;
+                                        }
+                                    )
+                              }
+                          )
+                      )
                     )
                 ),
                 body : new Padding (
@@ -120,7 +123,8 @@ namespace MikuMikuManager.App {
         );
     }
 
-    public enum SortType {
+    public enum SortType
+    {
         ByDefault,
         ByFavorite
     }
