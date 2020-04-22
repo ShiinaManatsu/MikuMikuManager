@@ -61,9 +61,11 @@ namespace MikuMikuManager.Data
             RootPath = rootPath;
             WatchedFolder = watchedFolder;
             Tags = new ReactiveCollection<Tag>();
-            IsFavored = new ReactiveProperty<bool>(MMDObjectXML.LoadMMDObjectXML(this).IsFavored);
+            IsFavored.Value = MMDObjectXML.LoadMMDObjectXML(this).IsFavored;
 
-            IsFavored.ObserveEveryValueChanged(x => x.Value)
+            IsFavored
+                .Skip(1)
+                .DistinctUntilChanged()
                 .Subscribe(x => MMDObjectXML.SaveToXML(this));
         }
     }
