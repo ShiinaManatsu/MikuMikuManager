@@ -5,9 +5,12 @@ using UniRx;
 using UniRx.Triggers;
 using System;
 
+/// <summary>
+/// Provide right click detection
+/// </summary>
 public class UIClickProperty : MonoBehaviour
 {
-    public static bool IsMRBClicked { get; set; } = false;
+    public bool IsMRBClicked { get; set; } = false;
     public ReactiveProperty<bool> isMRBClicked;
 
     void Start()

@@ -1,13 +1,13 @@
 ﻿using MikuMikuManager.Data;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 using UnityEngine;
 
 namespace MikuMikuManager.Services
 {
+    /// <summary>
+    /// Represents a pmx xml file
+    /// </summary>
     public class MMDObjectXML
     {
         public bool IsFavored;
@@ -29,7 +29,7 @@ namespace MikuMikuManager.Services
             {
                 var serializer = new XmlSerializer(typeof(MMDObjectXML));
                 var reader = new StreamReader(path);
-                var res= serializer.Deserialize(reader) as MMDObjectXML;
+                var res = serializer.Deserialize(reader) as MMDObjectXML;
                 reader.Close();
                 return res;
             }
@@ -40,6 +40,9 @@ namespace MikuMikuManager.Services
         }
     }
 
+    /// <summary>
+    /// Represents a app setting xml file
+    /// </summary>
     public class AppSettingsXML
     {
         [XmlArray("Folders")]
@@ -62,7 +65,7 @@ namespace MikuMikuManager.Services
             {
                 var serializer = new XmlSerializer(typeof(AppSettingsXML));
                 var reader = new StreamReader(path);
-                var res= serializer.Deserialize(reader) as AppSettingsXML;
+                var res = serializer.Deserialize(reader) as AppSettingsXML;
                 reader.Close();
                 return res;
             }

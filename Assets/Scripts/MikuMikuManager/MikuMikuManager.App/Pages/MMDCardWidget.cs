@@ -105,29 +105,32 @@ namespace MikuMikuManager.App
 
         private void ShowContextMenu(BuildContext context)
         {
-            if (UIClickProperty.IsMRBClicked)
+            if (GameObject.Find("Panel").GetComponent<UIClickProperty>().IsMRBClicked)
             {
-                Debug.Log(context);
-                PopupMenuUtils.showMenu(
-                    context: context,
-                    position: RelativeRect.fromLTRB(Input.mousePosition.x, Screen.height - Input.mousePosition.y, Screen.width - Input.mousePosition.x, Input.mousePosition.y),
-                    items: new List<PopupMenuEntry<Widget>>
-                    {
-                                                new PopupMenuItem<Widget>(
-                                                        child:new Text("Test Menu A")
-                                                    ),
-                                                new PopupMenuItem<Widget>(
-                                                        child:new Text("Test Menu B")
-                                                    ),
-                                                new PopupMenuItem<Widget>(
-                                                        child:new Text("Test Menu C")
-                                                    ),
-                                                new PopupMenuItem<Widget>(
-                                                        child:new Text("Test Menu D")
-                                                    )
-                    },
-                    initialValue: null
-                );
+                using (WindowProvider.of(GameObject.Find("Panel")).getScope())
+                {
+
+                    PopupMenuUtils.showMenu(
+                        context: context,
+                        position: RelativeRect.fromLTRB(Input.mousePosition.x, Screen.height - Input.mousePosition.y, Screen.width - Input.mousePosition.x, Input.mousePosition.y),
+                        items: new List<PopupMenuEntry<Widget>>
+                        {
+                        new PopupMenuItem<Widget>(
+                                child:new Text("Test Menu A ")
+                            ),
+                        new PopupMenuItem<Widget>(
+                                child:new Text("Test Menu B")
+                            ),
+                        new PopupMenuItem<Widget>(
+                                child:new Text("Test Menu C")
+                            ),
+                        new PopupMenuItem<Widget>(
+                                child:new Text("Test Menu D")
+                            )
+                        },
+                        initialValue: null
+                    );
+                }
             }
         }
 

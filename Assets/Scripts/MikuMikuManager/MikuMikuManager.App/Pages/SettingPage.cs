@@ -34,7 +34,7 @@
         private List<Chip> chips = new List<Chip>();
         private IDisposable observeCountChanged;
 
-        protected override bool wantKeepAlive => true;
+        protected override bool wantKeepAlive => false;
 
         /// <summary>
         /// The build.

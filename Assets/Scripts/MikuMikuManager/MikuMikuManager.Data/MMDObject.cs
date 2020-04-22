@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using MikuMikuManager.Services;
+using System.Linq;
 using UniRx;
-using MikuMikuManager.Services;
+using UnityEngine;
 
 namespace MikuMikuManager.Data
 {
