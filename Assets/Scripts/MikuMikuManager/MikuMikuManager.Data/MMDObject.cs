@@ -54,6 +54,9 @@ namespace MikuMikuManager.Data
         /// <param name="friendlyName">Friendly name</param>
         public MMDObject(string fileName, string rootPath, string watchedFolder, string friendlyName = "")
         {
+            IsFavored = new ReactiveProperty<bool>(false);
+            FilePath = fileName;
+            FileName = fileName.Substring(fileName.LastIndexOf("\\")+1);
             FriendlyName = new ReactiveProperty<string>(friendlyName);
             RootPath = rootPath;
             WatchedFolder = watchedFolder;
