@@ -14,7 +14,8 @@ namespace MikuMikuManager.Services
 
         public static void SaveToXML(MMDObject @object)
         {
-            var path = $"{@object.FileName}.xml";
+            Debug.Log("SaveToXML");
+            var path = $"{@object.FilePath}.xml";
             TextWriter writer = new StreamWriter(path);
             var serializer = new XmlSerializer(typeof(MMDObjectXML));
             serializer.Serialize(writer, new MMDObjectXML() { IsFavored = @object.IsFavored.Value });
