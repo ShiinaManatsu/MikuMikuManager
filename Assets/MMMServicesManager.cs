@@ -13,9 +13,8 @@ namespace MikuMikuManager.Services
         void Start()
         {
             Observable
-                .Return(true)
-                .Delay(TimeSpan.FromSeconds(3))
-                .Subscribe(_ => panel.AddComponent<MMMFlutterApp>());
+                .Timer(TimeSpan.FromSeconds(2))
+                .Subscribe(_ => panel.GetComponent<MMMFlutterApp>().enabled = true);
         }
     }
 
