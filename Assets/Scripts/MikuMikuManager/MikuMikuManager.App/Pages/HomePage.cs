@@ -1,19 +1,16 @@
 ﻿namespace MikuMikuManager.App
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System;
     using MikuMikuManager.Data;
     using MikuMikuManager.Services;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
     using UniRx;
     using Unity.UIWidgets.material;
+    using Unity.UIWidgets.painting;
     using Unity.UIWidgets.widgets;
     using UnityEngine;
-    using Material = Unity.UIWidgets.material.Material;
-    using Unity.UIWidgets.painting;
-    using Unity.UIWidgets.rendering;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the <see cref="HomePage" />.
@@ -35,7 +32,7 @@
         /// <summary>
         /// Defines the countChanged.
         /// </summary>
-        internal IDisposable countChanged;
+        private IDisposable countChanged;
 
         #region Private state
         private SortType SortType { get; set; } = SortType.ByDefault;
@@ -44,9 +41,13 @@
         #endregion
 
         protected override bool wantKeepAlive => true;
-        private readonly string alertTitle = "感谢尝试Alpha版本的MikuMikuManager!";
-        private readonly string alertContent = "当前预览需要配合MikuMikuPreview或者将预览文件命名为\"模型名字\".pmx.png并与pmx文件放在同一目录";
 
+        #region Tip string
+
+        private readonly string alertTitle = "感谢尝试Alpha版本的MikuMikuManager!";
+        private readonly string alertContent = "当前预览需要配合MikuMikuPreview或者将预览文件命名为\"模型名字\".pmx.png并与pmx文件放在同一目录"; 
+
+        #endregion
 
         /// <summary>
         /// The build.
@@ -100,9 +101,8 @@
         /// </summary>
         public override void initState()
         {
+            mMDObjects = new List<MMDObject>();
             base.initState();
-            var observeCountChanged = MMMServices.Instance.ObservedMMDObjects.ObserveCountChanged(true).Select(x=>true);
-            var observeMove = MMMServices.Instance.ObservedMMDObjects.ObserveMove().Select(x => true);
 
             #region Subscription
 
@@ -134,7 +134,9 @@
                     }
                 });
 
+            #endregion
 
+            #region Show tips
             Task.Run(() =>
             {
                 Task.Delay(TimeSpan.FromSeconds(3));
@@ -146,10 +148,11 @@
                              content: new Text(alertContent),
                              actions: new List<Widget>
                              {
-                                new RaisedButton(child:new Text("Close",style:new TextStyle(color:Colors.white)),onPressed:()=>Navigator.of(c).pop())
+                                        new RaisedButton(child:new Text("Close",style:new TextStyle(color:Colors.white)),onPressed:()=>Navigator.of(c).pop())
                              }
                          ));
             });
+            #endregion
         }
 
         /// <summary>
