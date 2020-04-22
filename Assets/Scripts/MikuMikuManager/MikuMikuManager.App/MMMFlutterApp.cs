@@ -24,7 +24,8 @@ namespace MikuMikuManager.App {
 
         const string homePage = "/";
         const string previewPage = "/Preview";
-        static TextEditingController controller = new TextEditingController ();
+        const string aboutPage = "/About";
+
         public static ReactiveProperty<string> SearchPattern { get; set; } = new ReactiveProperty<string>(string.Empty);
 
         public static ReactiveProperty<SortType> SortTypeProperty;
@@ -37,7 +38,10 @@ namespace MikuMikuManager.App {
                         screen = home;
                         break;
                     case previewPage:
-                        screen = new ItemPreviewPage ();
+                        screen = new ItemPreviewPage();
+                        break;
+                    case aboutPage:
+                        screen = new AboutPage();
                         break;
                     default:
                         screen = new Center (child: new Text ("Error route"));
