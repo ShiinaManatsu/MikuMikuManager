@@ -122,7 +122,7 @@ namespace MikuMikuManager.Services
             pmxs.ToObservable()
                 .ForEachAsync(x =>
                     {
-                        var obj = new MMDObject(x, x.Remove(x.LastIndexOf("/")), path);
+                        var obj = new MMDObject(x, x.Remove(x.LastIndexOf("\\")), path);
                         ObservedMMDObjects.Add(obj);
                     }
                 )
