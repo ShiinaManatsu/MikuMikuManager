@@ -69,7 +69,7 @@
             list.Add(new ButtonBar(children: new List<Widget> {
                 new FlatButton (onPressed: () => {
                         var path = StandaloneFileBrowser.OpenFolderPanel ("Select Folder", "", false);
-                        var trimed = path[0].Replace ('\\', '/');
+                        var trimed = path[0];//.Replace ('\\', '/');
                         if (!MMMServices.Instance.WatchedFolders.Contains (trimed)) {
                             MMMServices.Instance.WatchedFolders.Add (trimed);
                         }
