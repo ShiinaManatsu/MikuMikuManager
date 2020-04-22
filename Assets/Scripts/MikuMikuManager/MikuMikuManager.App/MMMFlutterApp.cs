@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UniRx;
 using Unity.UIWidgets.engine;
 using Unity.UIWidgets.material;
@@ -8,18 +7,24 @@ using Unity.UIWidgets.rendering;
 using Unity.UIWidgets.ui;
 using Unity.UIWidgets.widgets;
 using UnityEngine;
-using MikuMikuManager.Services;
 
 /// <summary>
 /// Flutter application namespace
 /// </summary>
-namespace MikuMikuManager.App {
-    public class MMMFlutterApp : UIWidgetsPanel {
-        protected override void OnEnable () {
-            FontManager.instance.addFont (Resources.Load<Font> (path: "Fonts/MATERIALICONS-REGULAR"), "Material Icons");
-            base.OnEnable ();
+namespace MikuMikuManager.App
+{
 
-            SortTypeProperty = new ReactiveProperty<SortType>(SortType.ByDefault);
+    public static class ContextProvider
+    {
+        public static BuildContext BuildContext { get; set; }
+    }
+
+    public class MMMFlutterApp : UIWidgetsPanel
+    {
+        protected override void OnEnable()
+        {
+            FontManager.instance.addFont(Resources.Load<Font>(path: "Fonts/MATERIALICONS-REGULAR"), "Material Icons");
+            base.OnEnable();
         }
 
         const string homePage = "/";
@@ -28,12 +33,14 @@ namespace MikuMikuManager.App {
 
         public static ReactiveProperty<string> SearchPattern { get; set; } = new ReactiveProperty<string>(string.Empty);
 
-        public static ReactiveProperty<SortType> SortTypeProperty;
+        public static ReactiveProperty<SortType> SortTypeProperty { get; set; } = new ReactiveProperty<SortType>(SortType.ByDefault);
 
-        protected override Widget createWidget () => new MaterialApp (
-            onGenerateRoute: (settings) => {
+        protected override Widget createWidget() => new MaterialApp(
+            onGenerateRoute: (settings) =>
+            {
                 Widget screen;
-                switch (settings.name) {
+                switch (settings.name)
+                {
                     case homePage:
                         screen = home;
                         break;
@@ -44,33 +51,48 @@ namespace MikuMikuManager.App {
                         screen = new AboutPage();
                         break;
                     default:
-                        screen = new Center (child: new Text ("Error route"));
+                        screen = new Center(child: new Text("Error route"));
                         break;
                 }
-                return new MaterialPageRoute (builder: (context) => screen);
+                return new MaterialPageRoute(builder: (context) =>
+                {
+                    ContextProvider.BuildContext = context;
+                    return screen;
+                });
             },
-            title: "MikuMikuManager"
+            title: "MikuMikuManager",
+            theme:new ThemeData(
+                pageTransitionsTheme:new PageTransitionsTheme(
+                    builder:new FadeUpwardsPageTransitionsBuilder()
+                    )
+                )
         );
 
-        static readonly Widget home = new DefaultTabController (
-            length: 3,
-            child: new Scaffold (
-                appBar : new AppBar (
-                    bottom: new TabBar (
-                        tabs : new List<Widget> {
+        static readonly Widget home = new DefaultTabController(
+            length: 2,
+            child: new Scaffold(
+                drawer:new Drawer(
+                    child:new Builder(builder:context =>
+                                new FlatButton(
+                                    child: new Text("About"),
+                                    onPressed: () => Navigator.popAndPushNamed(context, aboutPage)))),
+                appBar: new AppBar(
+                    bottom: new TabBar(
+                        tabs: new List<Widget> {
                             new Container (height: 30, child: new Text ("Home")),
-                            new Container (height: 30, child: new Text ("Settings")),
-                            new Container (height: 30, child: new Text ("About")),
+                            new Container (height: 30, child: new Text ("Settings"))
+                            //,
+                            //new Container (height: 30, child: new Text ("About")),
                         },
-                        labelStyle : new TextStyle (fontSize: 24f),
+                        labelStyle: new TextStyle(fontSize: 24f),
                         indicatorSize: TabBarIndicatorSize.tab
                     ),
-                    title : new Builder (builder: context =>
-                        new Container (
-                            child : new Row (
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                mainAxisSize: MainAxisSize.max,
-                                children: new List<Widget> {
+                    title: new Builder(builder: context =>
+                      new Container(
+                          child: new Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisSize: MainAxisSize.max,
+                              children: new List<Widget> {
                                     new Text ("MikuMikuManager"),
                                     new Container (
                                         padding: EdgeInsets.all(8),
@@ -81,7 +103,6 @@ namespace MikuMikuManager.App {
                                             borderRadius:BorderRadius.circular(5)),
                                         child:
                                         new TextField (
-                                            controller: controller,
                                             decoration: InputDecoration.collapsed (
                                                 hintText: "Search..."
                                             ),
@@ -113,13 +134,14 @@ namespace MikuMikuManager.App {
                       )
                     )
                 ),
-                body : new Padding (
-                    padding: EdgeInsets.all (8),
-                    child: new TabBarView (
-                        children : new List<Widget> {
+                body: new Padding(
+                    padding: EdgeInsets.all(8),
+                    child: new TabBarView(
+                        children: new List<Widget> {
                             new HomePage (),
-                            new SettingPage (),
-                            new AboutPage ()
+                            new SettingPage ()
+                            //,
+                            //new AboutPage ()
                         }
                     )
                 )
