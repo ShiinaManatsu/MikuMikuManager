@@ -23,7 +23,7 @@ namespace MikuMikuManager.Services
 
         public static MMDObjectXML LoadMMDObjectXML(MMDObject @object)
         {
-            var path = $"{@object.FileName}.xml";
+            var path = $"{@object.FilePath}.xml";
             if (File.Exists(path))
             {
                 var serializer = new XmlSerializer(typeof(MMDObjectXML));

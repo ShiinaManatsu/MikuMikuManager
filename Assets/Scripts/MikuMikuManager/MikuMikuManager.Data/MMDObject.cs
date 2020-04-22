@@ -12,6 +12,11 @@ namespace MikuMikuManager.Data
     public class MMDObject
     {
         /// <summary>
+        /// Full file path
+        /// </summary>
+        public string FilePath { get; private set; }
+
+        /// <summary>
         /// File Name
         /// </summary>
         public string FileName { get; private set; }
@@ -49,7 +54,6 @@ namespace MikuMikuManager.Data
         /// <param name="friendlyName">Friendly name</param>
         public MMDObject(string fileName, string rootPath, string watchedFolder, string friendlyName = "")
         {
-            FileName = fileName;
             FriendlyName = new ReactiveProperty<string>(friendlyName);
             RootPath = rootPath;
             WatchedFolder = watchedFolder;

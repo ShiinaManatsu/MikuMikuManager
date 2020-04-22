@@ -37,7 +37,7 @@ namespace MikuMikuManager.App
 
         public override Widget build(BuildContext context)
         {
-            var path = $"{widget.MMDObject.FileName}.png";
+            var path = $"{widget.MMDObject.FilePath}.png";
             var buttonGroup = new Positioned(
                 bottom: 0,
                 right: 0,
