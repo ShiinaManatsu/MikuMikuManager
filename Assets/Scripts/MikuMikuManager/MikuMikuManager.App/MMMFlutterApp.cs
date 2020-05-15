@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using MikuMikuManager.Services;
 using UniRx;
 using Unity.UIWidgets.engine;
 using Unity.UIWidgets.material;
@@ -13,7 +16,6 @@ using UnityEngine;
 /// </summary>
 namespace MikuMikuManager.App
 {
-
     public static class ContextProvider
     {
         public static BuildContext BuildContext { get; set; }
@@ -33,7 +35,8 @@ namespace MikuMikuManager.App
 
         public static ReactiveProperty<string> SearchPattern { get; set; } = new ReactiveProperty<string>(string.Empty);
 
-        public static ReactiveProperty<SortType> SortTypeProperty { get; set; } = new ReactiveProperty<SortType>(SortType.ByDefault);
+        public static ReactiveProperty<SortType> SortTypeProperty { get; set; } =
+            new ReactiveProperty<SortType>(SortType.ByDefault);
 
         protected override Widget createWidget() => new MaterialApp(
             onGenerateRoute: (settings) =>
@@ -54,6 +57,7 @@ namespace MikuMikuManager.App
                         screen = new Center(child: new Text("Error route"));
                         break;
                 }
+
                 return new MaterialPageRoute(builder: (context) =>
                 {
                     ContextProvider.BuildContext = context;
@@ -61,26 +65,27 @@ namespace MikuMikuManager.App
                 });
             },
             title: "MikuMikuManager",
-            theme:new ThemeData(
-                pageTransitionsTheme:new PageTransitionsTheme(
-                    builder:new FadeUpwardsPageTransitionsBuilder()
-                    )
+            theme: new ThemeData(
+                pageTransitionsTheme: new PageTransitionsTheme(
+                    builder: new FadeUpwardsPageTransitionsBuilder()
                 )
+            )
         );
 
-        static readonly Widget home = new DefaultTabController(
+        private static readonly Widget home = new DefaultTabController(
             length: 2,
             child: new Scaffold(
-                drawer:new Drawer(
-                    child:new Builder(builder:context =>
-                                new FlatButton(
-                                    child: new Text("About"),
-                                    onPressed: () => Navigator.popAndPushNamed(context, aboutPage)))),
+                drawer: new Drawer(
+                    child: new Builder(builder: context =>
+                        new FlatButton(
+                            child: new Text("About"),
+                            onPressed: () => Navigator.popAndPushNamed(context, aboutPage)))),
                 appBar: new AppBar(
                     bottom: new TabBar(
-                        tabs: new List<Widget> {
-                            new Container (height: 30, child: new Text ("Home")),
-                            new Container (height: 30, child: new Text ("Settings"))
+                        tabs: new List<Widget>
+                        {
+                            new Container(height: 30, child: new Text("Home")),
+                            new Container(height: 30, child: new Text("Settings"))
                             //,
                             //new Container (height: 30, child: new Text ("About")),
                         },
@@ -88,62 +93,83 @@ namespace MikuMikuManager.App
                         indicatorSize: TabBarIndicatorSize.tab
                     ),
                     title: new Builder(builder: context =>
-                      new Container(
-                          child: new Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              mainAxisSize: MainAxisSize.max,
-                              children: new List<Widget> {
-                                    new Text ("MikuMikuManager"),
-                                    new Container (
+                        new Container(
+                            child: new Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.max,
+                                children: new List<Widget>
+                                {
+                                    new Text("MikuMikuManager"),
+                                    new Container(
                                         padding: EdgeInsets.all(8),
                                         width: Screen.width / 2,
-                                        decoration: new BoxDecoration (
+                                        decoration: new BoxDecoration(
                                             color: Colors.white24,
-                                            border: Border.all(color:Colors.white24),
-                                            borderRadius:BorderRadius.circular(5)),
+                                            border: Border.all(color: Colors.white24),
+                                            borderRadius: BorderRadius.circular(5)),
                                         child:
-                                        new TextField (
-                                            decoration: InputDecoration.collapsed (
+                                        new TextField(
+                                            decoration: InputDecoration.collapsed(
                                                 hintText: "Search..."
                                             ),
-                                            autofocus : false,
-                                            style : new TextStyle (fontSize: 17),
-                                            onSubmitted:x=>SearchPattern.Value=x
+                                            autofocus: false,
+                                            style: new TextStyle(fontSize: 17),
+                                            onSubmitted: x => SearchPattern.Value = x
                                         )),
                                     new PopupMenuButton<SortType>(
-                                        child:new Icon(Icons.sort),
-                                        itemBuilder:_=>new List<PopupMenuEntry<SortType>>
+                                        child: new Icon(Icons.sort),
+                                        itemBuilder: _ => new List<PopupMenuEntry<SortType>>
                                         {
-                                            new PopupMenuItem<SortType> (
+                                            new PopupMenuItem<SortType>(
                                                 value: SortType.ByDefault,
                                                 child: new Text("By Default")
                                             ),
-                                            new PopupMenuItem<SortType> (
+                                            new PopupMenuItem<SortType>(
                                                 value: SortType.ByFavorite,
                                                 child: new Text("By Favorite")
                                             ),
                                         },
-                                        initialValue:SortTypeProperty.Value,
-                                        onSelected: x =>
-                                        {
-                                            SortTypeProperty.Value=x;
-                                        }
+                                        initialValue: SortTypeProperty.Value,
+                                        onSelected: x => { SortTypeProperty.Value = x; }
                                     )
-                              }
-                          )
-                      )
+                                }
+                            )
+                        )
                     )
                 ),
                 body: new Padding(
                     padding: EdgeInsets.all(8),
                     child: new TabBarView(
-                        children: new List<Widget> {
-                            new HomePage (),
-                            new SettingPage ()
+                        children: new List<Widget>
+                        {
+                            new HomePage(),
+                            new SettingPage()
                             //,
                             //new AboutPage ()
                         }
                     )
+                ),
+                floatingActionButton: new Column(
+                    mainAxisAlignment:MainAxisAlignment.center,
+                    mainAxisSize:MainAxisSize.min,
+                    crossAxisAlignment:CrossAxisAlignment.end,
+                    children: new List<Widget>
+                    {
+                        FloatingActionButton.extended(
+                            icon: new Icon(icon: Icons.track_changes),
+                            label: new Text("Generate All"),
+                            onPressed: () =>
+                            {
+                                var builder = GameObject.Find("MMDRenderer")
+                                    .GetComponent<PreviewBuilder.PreviewBuilder>();
+                                builder.StartRender();
+                            }),
+                        new SizedBox(height:10,width:10),
+                        FloatingActionButton.extended(
+                            icon: new Icon(icon: Icons.refresh),
+                            label: new Text("Refresh"),
+                            onPressed: () => MMMServices.RefreshObservedMmdObjects()),
+                    }
                 )
             )
         );

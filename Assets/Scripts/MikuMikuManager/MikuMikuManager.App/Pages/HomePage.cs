@@ -35,9 +35,11 @@
         private IDisposable countChanged;
 
         #region Private state
+
         private SortType SortType { get; set; } = SortType.ByDefault;
         private string SearchPattern = "";
         private List<MMDObject> mMDObjects;
+
         #endregion
 
         protected override bool wantKeepAlive => true;
@@ -45,7 +47,7 @@
         #region Tip string
 
         private readonly string alertTitle = "感谢尝试Alpha版本的MikuMikuManager!";
-        private readonly string alertContent = "当前预览需要配合MikuMikuPreview或者将预览文件命名为\"模型名字\".pmx.png并与pmx文件放在同一目录"; 
+        private readonly string alertContent = "当前预览需要配合MikuMikuPreview或者将预览文件命名为\"模型名字\".pmx.png并与pmx文件放在同一目录";
 
         #endregion
 
@@ -70,13 +72,16 @@
                         childAspectRatio: 0.5f,
                         crossAxisCount: (int)(MediaQuery.of(context).size.width / 230f),
                         children: CardFilter()
-                ));
+                    ));
             }
         }
 
         private Widget BuildCard(MMDObject x) => new MMDCardWidget(x, (m, b) =>
         {
-            if (mounted) { setState(() => mMDObjects.Find(o => o.FilePath == m.FilePath).IsFavored.Value = b); }
+            if (mounted)
+            {
+                setState(() => mMDObjects.Find(o => o.FilePath == m.FilePath).IsFavored.Value = b);
+            }
         });
 
         private List<Widget> CardFilter()
@@ -84,15 +89,17 @@
             if (SearchPattern != "")
             {
                 var s = SearchPattern.Trim().Split(' ');
-                return SortType == SortType.ByDefault ?
-                            mMDObjects.Where(x => s.Any(p => x.FileName.Contains(p))).OrderBy(x => x.FilePath).Select(x => BuildCard(x)).ToList()
-                            : mMDObjects.Where(x => s.Any(p => x.FileName.Contains(p))).OrderByDescending(x => x.IsFavored.Value).Select(x => BuildCard(x)).ToList();
+                return SortType == SortType.ByDefault
+                    ? mMDObjects.Where(x => s.Any(p => x.FileName.Contains(p))).OrderBy(x => x.FilePath)
+                        .Select(x => BuildCard(x)).ToList()
+                    : mMDObjects.Where(x => s.Any(p => x.FileName.Contains(p)))
+                        .OrderByDescending(x => x.IsFavored.Value).Select(x => BuildCard(x)).ToList();
             }
             else
             {
-                return SortType == SortType.ByDefault ?
-                            mMDObjects.OrderBy(x => x.FilePath).Select(x => BuildCard(x)).ToList()
-                            : mMDObjects.OrderByDescending(x => x.IsFavored.Value).Select(x => BuildCard(x)).ToList();
+                return SortType == SortType.ByDefault
+                    ? mMDObjects.OrderBy(x => x.FilePath).Select(x => BuildCard(x)).ToList()
+                    : mMDObjects.OrderByDescending(x => x.IsFavored.Value).Select(x => BuildCard(x)).ToList();
             }
         }
 
@@ -114,8 +121,14 @@
             var observeMove = mmm.ObservedMMDObjects.ObserveMove().Select(x => true);
 
             countChanged = observeCountChanged.Merge(observeMove, observeEvery)
-                .Subscribe(_ => setState(() => mMDObjects = mmm.ObservedMMDObjects.ToList())
-                , onError: e => Debug.Log(e.Message));
+                .Subscribe(_ =>
+                    {
+                        using (WindowProvider.of(GameObject.Find("Panel")).getScope())
+                        {
+                            setState(() => mMDObjects = mmm.ObservedMMDObjects.ToList());
+                        }
+                    }
+                    , onError: e => Debug.Log(e.Message));
 
             // Sort event
             MMMFlutterApp.SortTypeProperty
@@ -137,6 +150,7 @@
             #endregion
 
             #region Show tips
+
             Task.Run(() =>
             {
                 Task.Delay(TimeSpan.FromSeconds(3));
@@ -144,14 +158,16 @@
                     context: context,
                     barrierDismissible: true,
                     builder: (c) => new AlertDialog(
-                             title: new Text(alertTitle),
-                             content: new Text(alertContent),
-                             actions: new List<Widget>
-                             {
-                                        new RaisedButton(child:new Text("Close",style:new TextStyle(color:Colors.white)),onPressed:()=>Navigator.of(c).pop())
-                             }
-                         ));
+                        title: new Text(alertTitle),
+                        content: new Text(alertContent),
+                        actions: new List<Widget>
+                        {
+                            new RaisedButton(child: new Text("Close", style: new TextStyle(color: Colors.white)),
+                                onPressed: () => Navigator.of(c).pop())
+                        }
+                    ));
             });
+
             #endregion
         }
 

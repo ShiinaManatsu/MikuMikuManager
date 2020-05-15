@@ -1,39 +1,26 @@
 ﻿//#define DEBUG
 
 using MikuMikuManager.Data;
+using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using UniRx;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace MikuMikuManager.Services
 {
-
     public class MMMServices : MonoBehaviour
     {
-        private static MMMServices instance = null;
-        private static GameObject container;
+        public static GameObject container;
+
+        public static Action RefreshObservedMmdObjects { get; set; }
 
         /// <summary>
         /// Static instances
         /// </summary>
-        public static MMMServices Instance
-        {
-            get
-            {
-                if (instance is null)
-                {
-                    Instance = container.AddComponent<MMMServices>();
-                    return instance;
-                }
-                else
-                {
-                    return instance;
-                }
-            }
-            set => instance = value;
-        }
+        public static MMMServices Instance => container.GetComponent<MMMServices>();
 
         public ReactiveCollection<string> WatchedFolders { get; set; }
 
@@ -47,17 +34,27 @@ namespace MikuMikuManager.Services
 
         #endregion
 
-        public MMMServices()
-        {
-            WatchedFolders = new ReactiveCollection<string>();
-            ObservedMMDObjects = new ReactiveCollection<MMDObject>();
-        }
 
-        private void Start()
+        private void Awake()
         {
             container = transform.gameObject;
+            WatchedFolders = new ReactiveCollection<string>();
+            ObservedMMDObjects = new ReactiveCollection<MMDObject>();
             ObservableSettings();
             SetupSettings();
+            RefreshObservedMmdObjects += () =>
+            {
+                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
+
+                ObservedMMDObjects.Clear();
+                Debug.Log("Reload");
+                foreach (var watchedFolder in WatchedFolders)
+                {
+                    GetMMDObgects(watchedFolder);
+                }
+
+                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
+            };
         }
 
         private void ObservableSettings()
@@ -80,15 +77,32 @@ namespace MikuMikuManager.Services
             var folderRemove = WatchedFolders.ObserveRemove();
 
             folderRemove
-            .SelectMany(x => ObservedMMDObjects.ToList().Where(f => f.WatchedFolder == x.Value))
-            .ForEachAsync(x => ObservedMMDObjects.Remove(x))
-            .Subscribe(x => { }, onError: e => Debug.Log(e));
+                .SelectMany(x => ObservedMMDObjects.ToList().Where(f => f.WatchedFolder == x.Value))
+                .ForEachAsync(x => ObservedMMDObjects.Remove(x))
+                .Subscribe(x => { }, onError: e => Debug.Log(e));
 
             //folderRemove.Select(x => FileSystemWatchers.Where(f => f.Path == x.Value).FirstOrDefault())
             //    .Do(x => x.Dispose())
             //    .Subscribe(x => FileSystemWatchers.Remove(x));
 
+            Observable.Timer(TimeSpan.FromSeconds(1))
+                .Subscribe(_ =>
+                {
+                    GameObject.Find("MMDRenderer").GetComponent<PreviewBuilder.PreviewBuilder>().OnRenderComplete +=
+                        () =>
+                        {
+                            System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
 
+                            ObservedMMDObjects.Clear();
+                            Debug.Log("Reload");
+                            foreach (var watchedFolder in WatchedFolders)
+                            {
+                                GetMMDObgects(watchedFolder);
+                            }
+
+                            System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
+                        };
+                });
         }
 
         private void SetupSettings()
@@ -113,7 +127,8 @@ namespace MikuMikuManager.Services
         private void GetMMDObgects(string path)
         {
             var pmxs = Directory
-                .EnumerateFiles(path, "*.*", SearchOption.AllDirectories).Where(s => Path.GetExtension(s).EndsWith(".pmx", true, CultureInfo.CurrentCulture));
+                .EnumerateFiles(path, "*.*", SearchOption.AllDirectories).Where(s =>
+                    Path.GetExtension(s).EndsWith(".pmx", true, CultureInfo.CurrentCulture));
 
             pmxs.ToObservable()
                 .ForEachAsync(x =>
@@ -125,5 +140,4 @@ namespace MikuMikuManager.Services
                 .Subscribe(x => { }, onError: e => Debug.Log(e));
         }
     }
-
 }

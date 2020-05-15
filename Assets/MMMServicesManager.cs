@@ -1,21 +1,23 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UniRx;
+﻿using MikuMikuManager.App;
 using System;
-using MikuMikuManager.App;
+using UniRx;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace MikuMikuManager.Services
 {
     public class MMMServicesManager : MonoBehaviour
     {
         public GameObject panel;
+
         void Start()
         {
             Observable
-                .Timer(TimeSpan.FromSeconds(2))
+                .Timer(TimeSpan.FromSeconds(1))
                 .Subscribe(_ => panel.GetComponent<MMMFlutterApp>().enabled = true);
+#if !UNITY_EDITOR
+            SceneManager.LoadScene(1, LoadSceneMode.Additive);
+#endif
         }
     }
-
 }
