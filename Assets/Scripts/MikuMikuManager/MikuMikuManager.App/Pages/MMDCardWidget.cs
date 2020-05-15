@@ -1,8 +1,8 @@
-﻿using System;
+﻿using MikuMikuManager.Data;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using MikuMikuManager.Data;
 using UniRx;
 using Unity.UIWidgets.material;
 using Unity.UIWidgets.painting;
@@ -120,33 +120,48 @@ namespace MikuMikuManager.App
             return stack;
         }
 
+        enum MenuItem
+        {
+            LoadPreview
+        }
+        
         private void ShowContextMenu(BuildContext context)
         {
             if (!GameObject.Find("Panel").GetComponent<UIClickProperty>().IsMRBClicked) return;
             using (WindowProvider.of(GameObject.Find("Panel")).getScope())
             {
-                PopupMenuUtils.showMenu(
+                PopupMenuUtils.showMenu<MenuItem>(
                     context,
                     RelativeRect.fromLTRB(Input.mousePosition.x, Screen.height - Input.mousePosition.y,
                         Screen.width - Input.mousePosition.x, Input.mousePosition.y),
-                    new List<PopupMenuEntry<Widget>>
+                    new List<PopupMenuEntry<MenuItem>>
                     {
-                        new PopupMenuItem<Widget>(
+                        new PopupMenuItem<MenuItem>(
+                            value: MenuItem.LoadPreview,
                             child: new Text("Load Preview")
-                        ),
-                        new PopupMenuItem<Widget>(
-                            child: new Text("Load Preview2")
-                        ),
+                        )
                     },
-                    null
-                ).Then(x=>
+                    initialValue: MenuItem.LoadPreview
+                ).Then(x =>
                 {
-                    var token = (int) x; 
-                    Debug.Log(token);
-                    if(x==null)return;
-                    var builder = GameObject.Find("MMDRenderer")
-                        .GetComponent<PreviewBuilder.PreviewBuilder>();
-                    builder.StartRender(_mmdObject);
+                    try
+                    {
+                        var token = (MenuItem) x;
+                        switch (token)
+                        {
+                            case MenuItem.LoadPreview:
+                                var builder = GameObject.Find("MMDRenderer")
+                                    .GetComponent<PreviewBuilder.PreviewBuilder>();
+                                builder.StartRender(_mmdObject);
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                 });
             }
         }
