@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using MikuMikuManager.Services;
+﻿using MikuMikuManager.Services;
+using System.Collections.Generic;
 using UniRx;
 using Unity.UIWidgets.animation;
 using Unity.UIWidgets.material;
@@ -171,7 +171,7 @@ namespace MikuMikuManager.App
                                 SizedBox.expand(
                                     child: new LinearProgressIndicator(
                                         backgroundColor: Colors.transparent,
-                                        value: -1,
+                                        value: 0,
                                         valueColor: new AlwaysStoppedAnimation<Color>(
                                             Colors.pink.withOpacity(0.3f)))),
                                 //Status text
@@ -182,10 +182,7 @@ namespace MikuMikuManager.App
                                         children: new List<Widget>
                                         {
                                             PaddingText(_renderStatus),
-                                            new Container(margin: EdgeInsets.symmetric(horizontal: 3), height: 20,
-                                                width: 1,
-                                                decoration: new BoxDecoration(
-                                                    border: new Border(left: new BorderSide(Colors.black54)))),
+                                            VerticalDivider,
                                             PaddingText(_savingStatus)
                                         }
                                     )
@@ -197,10 +194,16 @@ namespace MikuMikuManager.App
             );
         }
 
+        private static Widget VerticalDivider =>
+            new Container(margin: EdgeInsets.symmetric(horizontal: 3), height: 20,
+                width: 1,
+                decoration: new BoxDecoration(
+                    border: new Border(left: new BorderSide(Colors.black54))));
+
         private Widget PaddingText(string text)
         {
             return new Container(
-                padding: EdgeInsets.only(right: 3),
+                padding: EdgeInsets.only(right: 0),
                 child: new Text(text)
             );
         }
