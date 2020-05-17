@@ -38,23 +38,28 @@ namespace PreviewBuilder
         /// <summary>
         /// List of all the mmd objects loaded
         /// </summary>
-        private List<MMDObject> MmdObjects { get; set; }
+        public List<MMDObject> MmdObjects { get;private set; }
 
         /// <summary>
         /// Indicate if is in rendering now
         /// </summary>
-        private bool IsRendering { get; set; } = false;
+        public ReactiveProperty<bool> IsRendering { get;private set; } = new ReactiveProperty<bool>(false);
 
         /// <summary>
         /// Indicate if is in saving now
         /// </summary>
-        private bool IsSaving { get; set; } = false;
+        public ReactiveProperty<bool> IsSaving { get;private set; } = new ReactiveProperty<bool>(false);
 
-        private MMDObject _currentMmdObject;
+        public MMDObject _currentMmdObject { get; private set; }
 
         #endregion
 
         #region Public Members
+        public static GameObject container;
+        /// <summary>
+        /// Static instances
+        /// </summary>
+        public static PreviewBuilder Instance => container.GetComponent<PreviewBuilder>();
 
         public GameObject parent;
         public Camera rtCamera;
@@ -64,6 +69,11 @@ namespace PreviewBuilder
 
         #endregion
 
+        private void Awake()
+        {
+            container = transform.gameObject;
+        }
+
         private void Start()
         {
             MmdObjects = new List<MMDObject>();
@@ -72,7 +82,7 @@ namespace PreviewBuilder
         private void FixedUpdate()
         {
             // Save rt ass♂ we can
-            if (!IsRendering || IsSaving) return;
+            if (!IsRendering.Value || IsSaving.Value) return;
             if (MmdObjects.Count != 0)
             {
                 //OnRenderStart();    //  Notify that start render
@@ -91,10 +101,10 @@ namespace PreviewBuilder
                     };
 
                     rtCamera.targetTexture = rt;
-                    IsSaving = true;
+                    IsSaving.Value = true;
 
                     CreatePmx();
-                    StartCoroutine(TakePhoto(0.5f, rt));
+                    StartCoroutine(TakePhoto(1f, rt));
                 }
                 catch (Exception e)
                 {
@@ -104,7 +114,7 @@ namespace PreviewBuilder
             }
             else
             {
-                IsRendering = false;
+                IsRendering.Value = false;
                 rtCamera.targetTexture = null;
             }
 
@@ -119,13 +129,13 @@ namespace PreviewBuilder
                           select obj;
             MmdObjects.AddRange(objects);
 
-            IsRendering = true;
+            IsRendering.Value = true;
         }
 
         public void StartRender(MMDObject mmdObject)
         {
             MmdObjects.Add(mmdObject);
-            IsRendering = true;
+            IsRendering.Value = true;
         }
 
         /// <summary>
@@ -194,7 +204,7 @@ namespace PreviewBuilder
             _currentMmdObject.PreviewPath.Value = path;
 
 
-            IsSaving = false;
+            IsSaving.Value = false;
         }
 
         #endregion
