@@ -1,7 +1,7 @@
 ﻿namespace MikuMikuManager.App
 {
-    using MikuMikuManager.Data;
-    using MikuMikuManager.Services;
+    using Data;
+    using Services;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -62,18 +62,17 @@
             {
                 return new Center(child: new Text("Add watch folder in settings"));
             }
-            else
-            {
-                return new Container(
-                    child: GridView.count(
-                        primary: false,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
-                        childAspectRatio: 0.5f,
-                        crossAxisCount: (int)(MediaQuery.of(context).size.width / 230f),
-                        children: CardFilter()
-                    ));
-            }
+
+            return new Scrollbar(
+                child: GridView.count(
+                    primary: false,
+                    padding:EdgeInsets.only(bottom:50),
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 0.5f,
+                    crossAxisCount: (int)(MediaQuery.of(context).size.width / 230f),
+                    children: CardFilter()
+                ));
         }
 
         private Widget BuildCard(MMDObject x) => new MMDCardWidget(x, (m, b) =>
