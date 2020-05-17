@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using UniRx;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace MikuMikuManager.Services
 {
@@ -50,7 +49,7 @@ namespace MikuMikuManager.Services
                 Debug.Log("Reload");
                 foreach (var watchedFolder in WatchedFolders)
                 {
-                    GetMMDObgects(watchedFolder);
+                    GetMmdObjects(watchedFolder);
                 }
 
                 System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
@@ -64,7 +63,7 @@ namespace MikuMikuManager.Services
             var watchNew = WatchedFolders.ObserveAdd();
 
             // Get mmd objects
-            watchNew.Subscribe(x => GetMMDObgects(x.Value));
+            watchNew.Subscribe(x => GetMmdObjects(x.Value));
 
             // Handle watch events
             //watchNew.Select(x => new FileSystemWatcher(x.Value))
@@ -97,7 +96,7 @@ namespace MikuMikuManager.Services
                             Debug.Log("Reload");
                             foreach (var watchedFolder in WatchedFolders)
                             {
-                                GetMMDObgects(watchedFolder);
+                                GetMmdObjects(watchedFolder);
                             }
 
                             System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
@@ -124,20 +123,17 @@ namespace MikuMikuManager.Services
                 .Subscribe(_ => AppSettings.SaveToXML());
         }
 
-        private void GetMMDObgects(string path)
+        private void GetMmdObjects(string path)
         {
-            var pmxs = Directory
+            var objects = Directory
                 .EnumerateFiles(path, "*.*", SearchOption.AllDirectories).Where(s =>
                     Path.GetExtension(s).EndsWith(".pmx", true, CultureInfo.CurrentCulture));
 
-            pmxs.ToObservable()
-                .ForEachAsync(x =>
-                    {
-                        var obj = new MMDObject(x, x.Remove(x.LastIndexOf("\\")), path);
-                        ObservedMMDObjects.Add(obj);
-                    }
-                )
-                .Subscribe(x => { }, onError: e => Debug.Log(e));
+            foreach (var x in objects)
+            {
+                var obj = new MMDObject(x, x.Remove(x.LastIndexOf("\\")), path);
+                ObservedMMDObjects.Add(obj);
+            }
         }
     }
 }

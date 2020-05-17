@@ -38,7 +38,7 @@ namespace PreviewBuilder
         /// <summary>
         /// List of all the mmd objects loaded
         /// </summary>
-        public List<MMDObject> MmdObjects { get;private set; }
+        public ReactiveCollection<MMDObject> MmdObjects { get;private set; }
 
         /// <summary>
         /// Indicate if is in rendering now
@@ -76,7 +76,7 @@ namespace PreviewBuilder
 
         private void Start()
         {
-            MmdObjects = new List<MMDObject>();
+            MmdObjects = new ReactiveCollection<MMDObject>();
         }
 
         private void FixedUpdate()
@@ -124,10 +124,17 @@ namespace PreviewBuilder
 
         public void StartRender()
         {
-            var objects = from obj in MMMServices.Instance.ObservedMMDObjects
-                          where obj.PreviewPath.Value == string.Empty
-                          select obj;
-            MmdObjects.AddRange(objects);
+            //var objects = from obj in MMMServices.Instance.ObservedMMDObjects
+            //              where obj.PreviewPath.Value == string.Empty
+            //              select obj;
+            //foreach (var o in objects)
+            //{
+            //    MmdObjects.Add(o);
+            //}
+
+            MmdObjects=MMMServices.Instance.ObservedMMDObjects
+                .Where(x => x.PreviewPath.Value == string.Empty)
+                .ToReactiveCollection();
 
             IsRendering.Value = true;
         }
