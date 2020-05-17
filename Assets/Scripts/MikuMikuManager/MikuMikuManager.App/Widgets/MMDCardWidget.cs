@@ -9,7 +9,6 @@ using Unity.UIWidgets.painting;
 using Unity.UIWidgets.rendering;
 using Unity.UIWidgets.widgets;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace MikuMikuManager.App
 {
@@ -97,7 +96,7 @@ namespace MikuMikuManager.App
             );
 
             var card = new GestureDetector(
-                child: _mmdObject.PreviewPath.Value != string.Empty
+                child: _mmdObject.PreviewPath.Value != string.Empty && File.Exists(_mmdObject.PreviewPath.Value)
                     ? new Card(
                         color: Colors.amber,
                         child: Image.memory(File.ReadAllBytes(_mmdObject.PreviewPath.Value), fit: BoxFit.cover))
@@ -124,7 +123,7 @@ namespace MikuMikuManager.App
         {
             LoadPreview
         }
-        
+
         private void ShowContextMenu(BuildContext context)
         {
             if (!GameObject.Find("Panel").GetComponent<UIClickProperty>().IsMRBClicked) return;
@@ -146,7 +145,7 @@ namespace MikuMikuManager.App
                 {
                     try
                     {
-                        var token = (MenuItem) x;
+                        var token = (MenuItem)x;
                         switch (token)
                         {
                             case MenuItem.LoadPreview:
