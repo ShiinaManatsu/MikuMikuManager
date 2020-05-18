@@ -103,7 +103,7 @@ namespace PreviewBuilder
                     IsSaving.Value = true;
 
                     CreatePmx();
-                    StartCoroutine(TakePhoto(1f, rt));
+                    StartCoroutine(TakePhoto(rt));
                 }
                 catch (Exception e)
                 {
@@ -170,10 +170,9 @@ namespace PreviewBuilder
             _fbxGameObject.transform.localRotation = new Quaternion(0f, 0f, 0f, 0f);
         }
 
-        private IEnumerator TakePhoto(float waitTime, RenderTexture renderTexture)
+        private IEnumerator TakePhoto(RenderTexture renderTexture)
         {
-            yield return new WaitForSeconds(waitTime);
-            //yield return new WaitForEndOfFrame();
+            yield return Observable.TimerFrame(2).ToYieldInstruction();
 
             // Take photo and set can save rt false
             SaveRenderTextureToFile(CurrentMmdObject.FilePath + ".png", renderTexture);
