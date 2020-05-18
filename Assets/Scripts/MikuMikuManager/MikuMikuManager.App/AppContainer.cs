@@ -1,7 +1,9 @@
 ﻿using MikuMikuManager.Services;
+using System;
 using System.Collections.Generic;
 using UniRx;
 using Unity.UIWidgets.animation;
+using Unity.UIWidgets.foundation;
 using Unity.UIWidgets.material;
 using Unity.UIWidgets.painting;
 using Unity.UIWidgets.rendering;
@@ -33,22 +35,50 @@ namespace MikuMikuManager.App
     {
         private string _renderStatus = "";
         private string _savingStatus = "";
+        private int _total = 0;
+        private int _remain = 0;
+        private string _fileName = "";
+        private int _count = 0;
 
         public override void initState()
         {
             base.initState();
-            PreviewBuilder.PreviewBuilder.Instance.IsRendering
+
+            Observable.EveryFixedUpdate()
+                .Select(_ => PreviewBuilder.PreviewBuilder.Instance.MmdObjects.first().FileName)
+                .DistinctUntilChanged()
+                .Where(x => x != null)
                 .Subscribe(x =>
                 {
                     using (WindowProvider.of(GameObject.Find("Panel")).getScope())
                     {
-                        var s = x
-                            ? $"Rendering - {PreviewBuilder.PreviewBuilder.Instance._currentMmdObject.FileName} {PreviewBuilder.PreviewBuilder.Instance.MmdObjects.Count} Remain"
-                            : "waiting";
-                        setState(() => _renderStatus = $"Render Status:{s}");
+                        _fileName = x;
+                        _count = PreviewBuilder.PreviewBuilder.Instance.MmdObjects.Count;
                     }
-                });
+                }, onError: e => Debug.Log(e.Message));
+
+            PreviewBuilder.PreviewBuilder.Instance.IsRendering
+                .ObserveEveryValueChanged(x => x.Value)
+                .Subscribe(x =>
+                {
+                    using (WindowProvider.of(GameObject.Find("Panel")).getScope())
+                    {
+                        try
+                        {
+                            setState(() =>
+                        _renderStatus =
+                            $"Render Status:{(x ? $"Rendering - {_fileName} {_count} Remain" : "waiting")}");
+                        }
+                        catch (Exception e)
+                        {
+
+                            Debug.Log(e.Message);
+                        }
+                    }
+                }, onError: e => Debug.Log(e.Message));
+
             PreviewBuilder.PreviewBuilder.Instance.IsSaving
+                .ObserveEveryValueChanged(x => x.Value)
                 .Subscribe(x =>
                 {
                     using (WindowProvider.of(GameObject.Find("Panel")).getScope())
@@ -57,6 +87,26 @@ namespace MikuMikuManager.App
                         setState(() => _savingStatus = $"Render Status:{s}");
                     }
                 });
+
+            PreviewBuilder.PreviewBuilder.Instance.MmdObjects
+                .ObserveEveryValueChanged(x=>x.Count)
+                .Subscribe(x =>
+                {
+                    Debug.Log($"{_remain} of {_total}");
+                    if (_total == 0 && x != 0)
+                    {
+                        using (WindowProvider.of(GameObject.Find("Panel")).getScope())
+                        {
+                            setState((() => _total = x));
+                        }
+                    }
+
+                    using (WindowProvider.of(GameObject.Find("Panel")).getScope())
+                    {
+                        setState((() => _remain = x));
+                        Debug.Log($"{_remain} of {_total}");
+                    }
+                }, onError: e => Debug.Log(e.Message));
         }
 
         public override Widget build(BuildContext context)
@@ -171,7 +221,7 @@ namespace MikuMikuManager.App
                                 SizedBox.expand(
                                     child: new LinearProgressIndicator(
                                         backgroundColor: Colors.transparent,
-                                        value: 0,
+                                        value: _total == 0 ? -1 : _remain / _total,
                                         valueColor: new AlwaysStoppedAnimation<Color>(
                                             Colors.pink.withOpacity(0.3f)))),
                                 //Status text
