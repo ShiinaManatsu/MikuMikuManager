@@ -4,7 +4,6 @@ using MMD;
 using MMD.PMX;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UniRx;
@@ -38,19 +37,19 @@ namespace PreviewBuilder
         /// <summary>
         /// List of all the mmd objects loaded
         /// </summary>
-        public ReactiveCollection<MMDObject> MmdObjects { get;private set; }
+        public ReactiveCollection<MMDObject> MmdObjects { get; set; }
 
         /// <summary>
         /// Indicate if is in rendering now
         /// </summary>
-        public ReactiveProperty<bool> IsRendering { get;private set; } = new ReactiveProperty<bool>(false);
+        public ReactiveProperty<bool> IsRendering { get; set; } = new ReactiveProperty<bool>(false);
 
         /// <summary>
         /// Indicate if is in saving now
         /// </summary>
-        public ReactiveProperty<bool> IsSaving { get;private set; } = new ReactiveProperty<bool>(false);
+        public ReactiveProperty<bool> IsSaving { get; set; } = new ReactiveProperty<bool>(false);
 
-        public MMDObject _currentMmdObject { get; private set; }
+        public MMDObject CurrentMmdObject { get; private set; }
 
         #endregion
 
@@ -86,14 +85,14 @@ namespace PreviewBuilder
             if (MmdObjects.Count != 0)
             {
                 //OnRenderStart();    //  Notify that start render
-                System.Windows.Forms.Cursor.Current= System.Windows.Forms.Cursors.WaitCursor;
+                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
                 try
                 {
-                    _currentMmdObject = MmdObjects.First();
+                    CurrentMmdObject = MmdObjects.First();
                     var rt = new RenderTexture(renderWidth, renderHeight, 0, RenderTextureFormat.ARGB32,
                         RenderTextureReadWrite.sRGB)
                     {
-                        name = $"{_currentMmdObject.FileName}",
+                        name = $"{CurrentMmdObject.FileName}",
                         depth = 0,
                         anisoLevel = 0,
                         dimension = TextureDimension.Tex2D,
@@ -132,7 +131,7 @@ namespace PreviewBuilder
             //    MmdObjects.Add(o);
             //}
 
-            MmdObjects=MMMServices.Instance.ObservedMMDObjects
+            MmdObjects = MMMServices.Instance.ObservedMMDObjects
                 .Where(x => x.PreviewPath.Value == string.Empty)
                 .ToReactiveCollection();
 
@@ -150,7 +149,7 @@ namespace PreviewBuilder
         /// </summary>
         private void CreatePmx()
         {
-            var modelAgent = new ModelAgent(_currentMmdObject.FilePath);
+            var modelAgent = new ModelAgent(CurrentMmdObject.FilePath);
             PMXFormat pmxFormat;
             try
             {
@@ -177,10 +176,10 @@ namespace PreviewBuilder
             //yield return new WaitForEndOfFrame();
 
             // Take photo and set can save rt false
-            SaveRenderTextureToFile(_currentMmdObject.FilePath + ".png", renderTexture);
+            SaveRenderTextureToFile(CurrentMmdObject.FilePath + ".png", renderTexture);
 
             Destroy(_fbxGameObject);
-            MmdObjects.Remove(_currentMmdObject);
+            MmdObjects.Remove(CurrentMmdObject);
             if (MmdObjects.Count == 0)
             {
                 OnRenderComplete();
@@ -207,8 +206,8 @@ namespace PreviewBuilder
             RenderTexture.active = null;
             File.WriteAllBytes(filePath, tex.EncodeToPNG());
 
-            var path = $"{_currentMmdObject.FilePath}.png";
-            _currentMmdObject.PreviewPath.Value = path;
+            var path = $"{CurrentMmdObject.FilePath}.png";
+            CurrentMmdObject.PreviewPath.Value = path;
 
 
             IsSaving.Value = false;
