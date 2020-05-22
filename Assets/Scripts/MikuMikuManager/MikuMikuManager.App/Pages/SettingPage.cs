@@ -1,15 +1,16 @@
-﻿namespace MikuMikuManager.App
+﻿using UnityEngine;
+
+namespace MikuMikuManager.App
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System;
     using MikuMikuManager.Services;
     using SFB;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using UniRx;
     using Unity.UIWidgets.material;
     using Unity.UIWidgets.rendering;
     using Unity.UIWidgets.widgets;
-    using UnityEngine;
 
     /// <summary>
     /// Defines the <see cref="SettingPage" />.
@@ -32,6 +33,7 @@
         /// Defines the chips.
         /// </summary>
         private List<Chip> chips = new List<Chip>();
+
         private IDisposable observeCountChanged;
 
         protected override bool wantKeepAlive => false;
@@ -46,11 +48,12 @@
             child: new Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
-                children: new List<Widget> {
-                    new Card (
-                        child: new Column (
-                            crossAxisAlignment : CrossAxisAlignment.start,
-                            children : BuildColumn ()
+                children: new List<Widget>
+                {
+                    new Card(
+                        child: new Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: BuildColumn()
                         )
                     )
                 }
@@ -65,21 +68,26 @@
         {
             var list = new List<Widget>();
             list.Add(new Text("Watched Folders"));
-            if (list.Count != 0) { list.AddRange(chips); }
-            list.Add(new ButtonBar(children: new List<Widget> {
-                new FlatButton (onPressed: () => {
-                        var path = StandaloneFileBrowser.OpenFolderPanel ("Select Folder", "", false);
-                        var trimed = path[0];//.Replace ('\\', '/');
-                        if (!MMMServices.Instance.WatchedFolders.Contains (trimed)) {
-                            MMMServices.Instance.WatchedFolders.Add (trimed);
+            if (list.Count != 0)
+            {
+                list.AddRange(chips);
+            }
+
+            list.Add(new ButtonBar(children: new List<Widget>
+            {
+                new FlatButton(onPressed: () =>
+                    {
+                        var path = StandaloneFileBrowser.OpenFolderPanel("Select Folder", "", false);
+                        var trimmed = path[0]; //.Replace ('\\', '/');
+                        if (!MMMServices.Instance.WatchedFolders.Contains(trimmed))
+                        {
+                            MMMServices.Instance.WatchedFolders.Add(trimmed);
                         }
                     },
-                    child : new Text ("Add Folder"))
+                    child: new Text("Add Folder"))
             }));
             return list;
         }
-
-        private void Call() => Debug.Log("Call");
 
         /// <summary>
         /// The initState.
@@ -87,21 +95,43 @@
         public override void initState()
         {
             base.initState();
-            observeCountChanged = MMMServices.Instance.WatchedFolders.ObserveCountChanged(true)
-                .Subscribe(x => setState(() =>
-                    chips = MMMServices.Instance.WatchedFolders
-                        .Select(f => new Chip(
-                            label: new Text(f), 
-                            deleteIcon: new Icon(Icons.delete), 
-                            onDeleted: () => MMMServices.Instance.WatchedFolders.Remove(f)))
-                        .ToList()));
-            Debug.Log(chips.Count);
+            var specifiedChanged = MMMServices.Instance.SpecifiedMmdObjects.ObserveCountChanged(true);
+            var folderChanged = MMMServices.Instance.WatchedFolders.ObserveCountChanged(true);
+
+            observeCountChanged = specifiedChanged.Merge(folderChanged)
+                .Subscribe(x =>
+                {
+                    using (WindowProvider.of(GameObject.Find("Panel")).getScope())
+                    {
+                        setState(() =>
+                        {
+                            // Add specified pmx chip
+                            var specified = MMMServices.Instance.SpecifiedMmdObjects
+                                .Select(f => new Chip(
+                                    label: new Text(f.FileName),
+                                    deleteIcon: new Icon(Icons.delete),
+                                    onDeleted: () => MMMServices.Instance.SpecifiedMmdObjects.Remove(f)))
+                                .ToList();
+
+                            // Add folder chip
+                            var folders = MMMServices.Instance.WatchedFolders
+                                .Select(f => new Chip(
+                                    label: new Text(f),
+                                    deleteIcon: new Icon(Icons.delete),
+                                    onDeleted: () => MMMServices.Instance.WatchedFolders.Remove(f)))
+                                .ToList();
+                            
+                            chips.Clear();
+                            chips.AddRange(specified);
+                            chips.AddRange(folders);
+                        });
+                    }
+                });
         }
 
         public override void dispose()
         {
             base.dispose();
-            Debug.Log("Disposed");
             observeCountChanged.Dispose();
         }
     }

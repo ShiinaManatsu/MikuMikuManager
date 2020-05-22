@@ -46,9 +46,12 @@ namespace MikuMikuManager.Services
     public class AppSettingsXML
     {
         [XmlArray("Folders")]
-        public string[] WatchedFolders;
+        public string[] WatchedFolders { get; set; }
 
-        public void SaveToXML()
+        [XmlArray("SpecifiedMMDObject")]
+        public string[] SpecifiedMmdObject { get; set; }
+
+        public void SaveToXml()
         {
             var path = Application.temporaryCachePath;
             Debug.Log(path);
@@ -58,7 +61,7 @@ namespace MikuMikuManager.Services
             writer.Close();
         }
 
-        public static AppSettingsXML LoadAppSettingsXML()
+        public static AppSettingsXML LoadAppSettingsXml()
         {
             var path = $"{Application.temporaryCachePath}/AppSettings.xml";
             if (File.Exists(path))
@@ -71,8 +74,8 @@ namespace MikuMikuManager.Services
             }
             else
             {
-                var xml = new AppSettingsXML() { WatchedFolders = new string[] { } };
-                xml.SaveToXML();
+                var xml = new AppSettingsXML { WatchedFolders = new string[] { }, SpecifiedMmdObject = new string[] { } };
+                xml.SaveToXml();
                 return xml;
             }
         }
