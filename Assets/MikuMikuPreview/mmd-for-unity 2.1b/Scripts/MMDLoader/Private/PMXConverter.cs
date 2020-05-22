@@ -112,15 +112,6 @@ namespace MMD
         /// <returns>メッシュ作成情報</returns>
         private MeshCreationInfo[] CreateMeshCreationInfo()
         {
-            // 1メッシュで収まる場合でも-Multi()を使っても問題は起き無いが、
-            // -Multi()では頂点数計測をマテリアル単位で行う関係上、頂点数が多く見積もられる(概算値)。
-            // (1頂点を複数のマテリアルが参照している場合に参照している分だけ計上してしまう。)
-            // 依って上限付近では本来1メッシュで収まる物が複数メッシュに分割されてしまう事が有るので注意。
-            // 
-            // -Multi()を使っても最終的には頂点数を最適化するので、
-            // 1メッシュに収まってしまえば-Single()と同じ頂点数に為る(確定値)。
-            // 
-            // 単純に-Single()の方が解析が少ない分早い。
 
             MeshCreationInfo[] result;
             if (format_.vertex_list.vertex.Length < c_max_vertex_count_in_mesh)
