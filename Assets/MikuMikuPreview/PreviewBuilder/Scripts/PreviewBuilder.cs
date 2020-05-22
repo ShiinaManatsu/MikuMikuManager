@@ -116,21 +116,10 @@ namespace PreviewBuilder
                 IsRendering.Value = false;
                 rtCamera.targetTexture = null;
             }
-
-            // Take photo~ Update save rt statement
-            // Statement.CanSaveRT = true;
         }
 
         public void StartRender()
         {
-            //var objects = from obj in MMMServices.Instance.ObservedMMDObjects
-            //              where obj.PreviewPath.Value == string.Empty
-            //              select obj;
-            //foreach (var o in objects)
-            //{
-            //    MmdObjects.Add(o);
-            //}
-
             MmdObjects = MMMServices.Instance.ObservedMMDObjects
                 .Where(x => x.PreviewPath.Value == string.Empty)
                 .ToReactiveCollection();
@@ -153,7 +142,6 @@ namespace PreviewBuilder
             PMXFormat pmxFormat;
             try
             {
-                //PMX読み込みを試みる
                 pmxFormat = PMXLoaderScript.Import(modelAgent.file_path_);
             }
             catch

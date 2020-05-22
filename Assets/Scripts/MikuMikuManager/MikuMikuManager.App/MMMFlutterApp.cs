@@ -77,6 +77,7 @@ namespace MikuMikuManager.App
                     builder: new FadeUpwardsPageTransitionsBuilder()
                 )
             )
+            //theme:ThemeData.dark()
         );
     }
 }
