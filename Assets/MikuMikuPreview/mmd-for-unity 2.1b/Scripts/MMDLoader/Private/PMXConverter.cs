@@ -487,17 +487,23 @@ namespace MMD
                 {
                     if (material.usually_texture_index < format_.texture_list.texture_file.Length)
                     {
-                        if (Path.GetExtension(texture_file_name).ToUpper() == ".DDS")
+                        if (texture_file_name.EndsWith(".dds",StringComparison.OrdinalIgnoreCase))
                         {
-                            main_texture = Texture2D.whiteTexture;
-                            main_texture = DDSImage.LoadDDS(path);
-                            main_texture.wrapModeV = TextureWrapMode.MirrorOnce;
+                            try
+                            {
+                                main_texture = DDSImage.LoadDDS(path);
+                                main_texture.wrapModeV = TextureWrapMode.MirrorOnce;
+                            }
+                            catch
+                            {
+                                main_texture = Texture2D.whiteTexture;
+                            }
                         }
-                        else if (Path.GetExtension(texture_file_name).ToUpper() == ".BMP")
+                        else if (texture_file_name.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase))
                         {
                             main_texture = BMPLoader.LoadBMP(path).ToTexture2D();
                         }
-                        else if (Path.GetExtension(texture_file_name).ToUpper() == ".TGA")
+                        else if (texture_file_name.EndsWith(".tga", StringComparison.OrdinalIgnoreCase))
                         {
                             try
                             {
