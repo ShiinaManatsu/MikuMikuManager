@@ -9,7 +9,6 @@ using MikuMikuManager.Services;
 
 public class FileDragAndDrop : MonoBehaviour
 {
-    List<string> log = new List<string>();
     void OnEnable ()
     {
         // must be installed on the main thread to get the right thread id.
@@ -23,27 +22,15 @@ public class FileDragAndDrop : MonoBehaviour
 
     void OnFiles(List<string> aFiles, POINT aPos)
     {
-        // do something with the dropped file names. aPos will contain the 
-        // mouse position within the window where the files has been dropped.
-        string str = "Dropped " + aFiles.Count + " files at: " + aPos + "\n\t" +
-            aFiles.Aggregate((a, b) => a + "\n\t" + b);
-        Debug.Log(str);
-        log.Add(str);
         foreach (var s in aFiles.Where(x => x.EndsWith(".pmx", StringComparison.OrdinalIgnoreCase)))
         {
-            MMMServices.Instance.SpecifiedMmdObjects.Add(new MMDObject(
-                s,
-                s.Remove(s.LastIndexOf("\\")),
-                string.Empty)
-            );
-        }
-    }
+            var mmdObject =new MMDObject(s, s.Remove(s.LastIndexOf("\\")),string.Empty);
+            var builder = GameObject.Find("MMDRenderer")
+                .GetComponent<PreviewBuilder.PreviewBuilder>();
 
-    private void OnGUI()
-    {
-        if (GUILayout.Button("clear log"))
-            log.Clear();
-        foreach (var s in log)
-            GUILayout.Label(s);
+            MMMServices.Instance.SpecifiedMmdObjects.Add(mmdObject);
+
+            builder.StartRender(mmdObject);
+        }
     }
 }
