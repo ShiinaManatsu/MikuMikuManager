@@ -37,6 +37,7 @@ namespace MikuMikuManager.App
         private string _savingStatus = "";
         private int _total = 0;
         private int _remain = 0;
+        private float _progress = 0;
         private string _fileName = "";
         private int _count = 0;
 
@@ -44,17 +45,39 @@ namespace MikuMikuManager.App
         {
             base.initState();
 
-            Observable.EveryFixedUpdate()
-                .Select(_ => PreviewBuilder.PreviewBuilder.Instance.MmdObjects.first().FileName)
+            PreviewBuilder.PreviewBuilder.Instance.MmdObjects.ObserveCountChanged()
                 .DistinctUntilChanged()
-                .Where(x => x != null)
-                .Subscribe(x =>
+                .Subscribe(_ =>
                 {
+                    var obj = PreviewBuilder.PreviewBuilder.Instance.MmdObjects;
+                    if (obj.Count == 0) return;
+
+                    var x = obj.first().FileName;
+                    var count = obj.Count;
+
+                    if (_total == 0 && count != 0)
+                    {
+                        _total = count;
+                    }
+
+                    if (count == 0)
+                    {
+                        _total = count;
+                    }
+
+                    _remain = count;
+
+                    Debug.Log($"{_remain} of {_total}");
+
                     using (WindowProvider.of(GameObject.Find("Panel")).getScope())
                     {
                         _fileName = x;
-                        _count = PreviewBuilder.PreviewBuilder.Instance.MmdObjects.Count;
+                        _count = count;
+                        _progress = _total == 0 ? -1 : _remain / _total;
                     }
+
+                    Debug.Log(_progress);
+
                 }, onError: e => Debug.Log(e.Message));
 
             PreviewBuilder.PreviewBuilder.Instance.IsRendering
@@ -88,25 +111,7 @@ namespace MikuMikuManager.App
                     }
                 });
 
-            PreviewBuilder.PreviewBuilder.Instance.MmdObjects
-                .ObserveEveryValueChanged(x=>x.Count)
-                .Subscribe(x =>
-                {
-                    Debug.Log($"{_remain} of {_total}");
-                    if (_total == 0 && x != 0)
-                    {
-                        using (WindowProvider.of(GameObject.Find("Panel")).getScope())
-                        {
-                            setState((() => _total = x));
-                        }
-                    }
-
-                    using (WindowProvider.of(GameObject.Find("Panel")).getScope())
-                    {
-                        setState((() => _remain = x));
-                        Debug.Log($"{_remain} of {_total}");
-                    }
-                }, onError: e => Debug.Log(e.Message));
+            Debug.Log("Finish init");
         }
 
         public override Widget build(BuildContext context)
@@ -179,7 +184,7 @@ namespace MikuMikuManager.App
                         child: new TabBarView(
                             children: new List<Widget>
                             {
-                                new HomePage(),
+                                new GalleryPage(),
                                 new SettingPage()
                             }
                         )
@@ -221,9 +226,9 @@ namespace MikuMikuManager.App
                                 SizedBox.expand(
                                     child: new LinearProgressIndicator(
                                         backgroundColor: Colors.transparent,
-                                        value: _total == 0 ? -1 : _remain / _total,
+                                        value: _progress,
                                         valueColor: new AlwaysStoppedAnimation<Color>(
-                                            Colors.pink.withOpacity(0.3f)))),
+                                            Colors.pink))),
                                 //Status text
                                 new Container(
                                     margin: EdgeInsets.only(5),

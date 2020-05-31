@@ -14,10 +14,10 @@ namespace MikuMikuManager.App
 {
     public class MMDCardWidget : StatefulWidget
     {
-        public MMDCardWidget(MMDObject mMDObject, Action<MMDObject, bool> callback)
+        public MMDCardWidget(MMDObject mMDObject, Action<MMDObject, bool> favoriteChanged)
         {
             MMDObject = mMDObject;
-            FavoriteCallback = callback;
+            FavoriteCallback = favoriteChanged;
         }
 
         public MMDObject MMDObject { get; }
@@ -98,10 +98,10 @@ namespace MikuMikuManager.App
             var card = new GestureDetector(
                 child: _mmdObject.PreviewPath.Value != string.Empty && File.Exists(_mmdObject.PreviewPath.Value)
                     ? new Card(
-                        color: Colors.amber,
+                        color: Colors.blueAccent,
                         child: Image.memory(File.ReadAllBytes(_mmdObject.PreviewPath.Value), fit: BoxFit.cover))
                     : new Card(
-                        color: Colors.amber,
+                        color: Colors.blueAccent,
                         child: new Center(child: new Icon(Icons.priority_high))
                     )
                 ,

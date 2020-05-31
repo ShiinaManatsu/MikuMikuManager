@@ -48,5 +48,11 @@ namespace PreviewBuilder
             Resources.UnloadUnusedAssets();
             GC.Collect();
         }
+
+        [MenuItem("MMM/Show xml path")]
+        public static void ShowXml()
+        {
+            Debug.Log($"{Application.temporaryCachePath}/AppSettings.xml");
+        }
     }
 }
