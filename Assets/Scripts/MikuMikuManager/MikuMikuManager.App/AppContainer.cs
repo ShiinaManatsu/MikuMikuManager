@@ -170,6 +170,10 @@ namespace MikuMikuManager.App
                                             new PopupMenuItem<SortType>(
                                                 value: SortType.ByFavorite,
                                                 child: new Text("By Favorite")
+                                            ),
+                                            new PopupMenuItem<SortType>(
+                                                value: SortType.ByFolder,
+                                                child: new Text("By Folder")
                                             )
                                         },
                                         initialValue: widget.SortTypeProperty.Value,
@@ -267,6 +271,7 @@ namespace MikuMikuManager.App
     public enum SortType
     {
         ByDefault,
-        ByFavorite
+        ByFavorite,
+        ByFolder
     }
 }

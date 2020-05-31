@@ -64,18 +64,63 @@
             }
 
             return new Scrollbar(
-                child: GridView.count(
+                child: BuildPanel(context)
+                );
+        }
+
+        private Widget BuildPanel(BuildContext context)
+        {
+            if (SortType == SortType.ByFolder)
+            {
+                void rebuild(Element el)
+                {
+                    el.markNeedsBuild();
+                    el.visitChildren(rebuild);
+                }
+                (context as Element).visitChildren(rebuild);
+
+                return new SingleChildScrollView(
+                    child: new ExpansionCardPanel(BuildExpansionDictionary()));
+            }
+            else
+            {
+                return GridView.count(
                     primary: false,
                     padding: EdgeInsets.only(bottom: 50),
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
                     childAspectRatio: 0.5f,
                     crossAxisCount: (int)(MediaQuery.of(context).size.width / 230f),
-                    children: CardFilter()
-                ));
+                    shrinkWrap: true,
+                    children: CardFilter().ConvertAll(x => x as Widget)
+                );
+            }
         }
 
-        private Widget BuildCard(MMDObject x) => new MMDCardWidget(x,
+        /// <summary>
+        /// Generate the list that <see cref="ExpansionCardPanel"/> needed
+        /// </summary>
+        public Dictionary<string, List<Widget>> BuildExpansionDictionary()
+        {
+            var dic = new Dictionary<string, List<Widget>>();
+            var c = CardFilter();
+            var specifiedPanelTitle = "Uncatalogued";
+
+            var lists = from o in c
+                        group o by o.MMDObject.WatchedFolder into g
+                        select new { Title = g.Key == string.Empty ? specifiedPanelTitle : g.Key, List = g };
+
+            foreach (var g in lists)
+            {
+                dic.Add(g.Title, g.List.ToList().ConvertAll(x => x as Widget));
+            }
+
+            return dic;
+        }
+
+        #region General Cards
+
+        private MMDCardWidget BuildCard(MMDObject x) => new MMDCardWidget(x,
             (m, b) =>
             {
                 if (mounted)
@@ -84,7 +129,7 @@
                 }
             });
 
-        private List<Widget> CardFilter()
+        private List<MMDCardWidget> CardFilter()
         {
             if (SearchPattern != "")
             {
@@ -102,6 +147,8 @@
                     : mMDObjects.OrderByDescending(x => x.IsFavored.Value).Select(x => BuildCard(x)).ToList();
             }
         }
+
+        #endregion
 
         /// <summary>
         /// The initState.
@@ -177,12 +224,6 @@
             });
 
             #endregion
-        }
-
-        public override void didUpdateWidget(StatefulWidget oldWidget)
-        {
-            base.didUpdateWidget(oldWidget);
-            Debug.Log(mMDObjects.Count);
         }
 
         /// <summary>
