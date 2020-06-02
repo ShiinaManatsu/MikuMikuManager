@@ -4,6 +4,7 @@
     using Services;
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using UniRx;
@@ -146,11 +147,12 @@
         {
             if (SearchPattern != "")
             {
+                var culture = CultureInfo.InvariantCulture;
                 var s = SearchPattern.Trim().Split(' ');
                 return SortType == SortType.ByDefault
-                    ? mMDObjects.Where(x => s.Any(p => x.FileName.Contains(p))).OrderBy(x => x.FilePath)
+                    ? mMDObjects.Where(x => s.Any(p => culture.CompareInfo.IndexOf(x.FileName, p, CompareOptions.IgnoreCase) >= 0)).OrderBy(x => x.FilePath)
                         .Select(x => BuildCard(x)).ToList()
-                    : mMDObjects.Where(x => s.Any(p => x.FileName.Contains(p)))
+                    : mMDObjects.Where(x => s.Any(p => culture.CompareInfo.IndexOf(x.FileName, p, CompareOptions.IgnoreCase) >= 0))
                         .OrderByDescending(x => x.IsFavored.Value).Select(x => BuildCard(x)).ToList();
             }
             else
