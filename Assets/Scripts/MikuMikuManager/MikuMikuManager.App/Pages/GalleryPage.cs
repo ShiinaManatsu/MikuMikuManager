@@ -64,23 +64,36 @@
             }
 
             return new Scrollbar(
-                child: BuildPanel(context)
+                child: BuildPanel()
                 );
         }
 
-        private Widget BuildPanel(BuildContext context)
+        private List<PanelItem> panelItems;
+
+        private Widget BuildPanel()
         {
+            // Logic for expansion panel
+            // TODO: Current this won't refresh after sort changed
             if (SortType == SortType.ByFolder)
             {
-                void rebuild(Element el)
-                {
-                    el.markNeedsBuild();
-                    el.visitChildren(rebuild);
-                }
-                (context as Element).visitChildren(rebuild);
-
                 return new SingleChildScrollView(
-                    child: new ExpansionCardPanel(BuildExpansionDictionary()));
+                        child: new ExpansionPanelList(
+                        expansionCallback: (index, isExpanded) => setState(() => panelItems[index].IsExpanded = !isExpanded),
+                        children: panelItems.Select(x => new ExpansionPanel(
+                             headerBuilder: (context, isExpanded) => new ListTile(title: new Text(x.Title), onTap: () => setState(() => x.IsExpanded = !isExpanded)),
+                             body: GridView.count(
+                                 padding: EdgeInsets.only(bottom: 50),
+                                 primary: false,
+                                 crossAxisSpacing: 8,
+                                 mainAxisSpacing: 8,
+                                 childAspectRatio: 0.5f,
+                                 crossAxisCount: (int)(MediaQuery.of(context).size.width / 230f),
+                                 shrinkWrap: true,
+                                 children: x.Cards),
+                                 isExpanded: x.IsExpanded
+                             )).ToList()
+                        )
+                    );
             }
             else
             {
@@ -98,7 +111,7 @@
         }
 
         /// <summary>
-        /// Generate the list that <see cref="ExpansionCardPanel"/> needed
+        /// Generate the list that <see cref="ExpansionCardViewWidget"/> needed
         /// </summary>
         public Dictionary<string, List<Widget>> BuildExpansionDictionary()
         {
@@ -156,6 +169,7 @@
         public override void initState()
         {
             mMDObjects = new List<MMDObject>();
+            panelItems = new List<PanelItem>();
             base.initState();
 
             #region Subscription
@@ -171,6 +185,7 @@
             countChanged = observeCountChanged.Merge(observeEveryChanged, specifiedCountChanged, specifiedChanged)
                 .Subscribe(_ =>
                     {
+                        Debug.Log("countChanged");
                         using (WindowProvider.of(GameObject.Find("Panel")).getScope())
                         {
                             var observed = mmm.ObservedMMDObjects.ToList();
@@ -180,6 +195,10 @@
                                 mMDObjects.Clear();
                                 mMDObjects.AddRange(observed);
                                 mMDObjects.AddRange(specified);
+
+                                // Set expansion panel items
+                                panelItems.Clear();
+                                panelItems.AddRange(BuildExpansionDictionary().Select(x => new PanelItem() { IsExpanded = true, Title = x.Key, Cards = x.Value }));
                             });
                         }
                     }
@@ -234,5 +253,26 @@
             base.dispose();
             countChanged.Dispose();
         }
+    }
+
+    /// <summary>
+    /// Expansion panel configuration
+    /// </summary>
+    public class PanelItem
+    {
+        /// <summary>
+        /// MMD objects contained
+        /// </summary>
+        public List<Widget> Cards { get; set; }
+
+        /// <summary>
+        /// Card title
+        /// </summary>
+        public string Title { get; set; }
+
+        /// <summary>
+        /// Indicate if the expansion expanded
+        /// </summary>
+        public bool IsExpanded { get; set; }
     }
 }
