@@ -128,8 +128,26 @@ namespace MikuMikuManager.App
                         bottom: new TabBar(
                             tabs: new List<Widget>
                             {
-                                new Container(height: 30, child: new Text("Home")),
-                                new Container(height: 30, child: new Text("Settings"))
+                                new Container(height: 30, child: new Text("Home",style:new TextStyle(
+                                    shadows: new List<BoxShadow> {
+                                        new BoxShadow(
+                                            color:Colors.red,
+                                            offset:new Offset(0,0),
+                                            blurRadius:5,
+                                            spreadRadius:5
+                                        )
+                                    }
+                                    ))),
+                                new Container(height: 30, child: new Text("Settings",style:new TextStyle(
+                                    shadows: new List<BoxShadow> {
+                                        new BoxShadow(
+                                            color:Colors.red,
+                                            offset:new Offset(0,0),
+                                            blurRadius:5,
+                                            spreadRadius:5
+                                        )
+                                    }
+                                    )))
                                 //,
                                 //new Container (height: 30, child: new Text ("About")),
                             },
@@ -149,7 +167,7 @@ namespace MikuMikuManager.App
                                         decoration: new BoxDecoration(
                                             Colors.white24,
                                             border: Border.all(Colors.white24),
-                                            borderRadius: BorderRadius.circular(5)),
+                                            borderRadius: BorderRadius.circular(18)),
                                         child:
                                         new TextField(
                                             decoration: InputDecoration.collapsed(

@@ -78,6 +78,7 @@
             if (SortType == SortType.ByFolder)
             {
                 return new SingleChildScrollView(
+                        child: new CustomElevation(
                         child: new ExpansionPanelList(
                         expansionCallback: (index, isExpanded) => setState(() => panelItems[index].IsExpanded = !isExpanded),
                         children: panelItems.Select(x => new ExpansionPanel(
@@ -93,7 +94,10 @@
                                  children: x.Cards),
                                  isExpanded: x.IsExpanded
                              )).ToList()
-                        )
+                        ),
+                        height: 60,
+                        padding: EdgeInsets.all(5)
+                    )
                     );
             }
             else

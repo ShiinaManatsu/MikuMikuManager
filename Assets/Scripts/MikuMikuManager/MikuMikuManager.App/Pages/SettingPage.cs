@@ -9,7 +9,9 @@ namespace MikuMikuManager.App
     using System.Linq;
     using UniRx;
     using Unity.UIWidgets.material;
+    using Unity.UIWidgets.painting;
     using Unity.UIWidgets.rendering;
+    using Unity.UIWidgets.ui;
     using Unity.UIWidgets.widgets;
 
     /// <summary>
@@ -32,7 +34,7 @@ namespace MikuMikuManager.App
         /// <summary>
         /// Defines the chips.
         /// </summary>
-        private List<Chip> chips = new List<Chip>();
+        private List<Widget> chips = new List<Widget>();
 
         private IDisposable observeCountChanged;
 
@@ -50,11 +52,18 @@ namespace MikuMikuManager.App
                 mainAxisSize: MainAxisSize.max,
                 children: new List<Widget>
                 {
-                    new Card(
-                        child: new Column(
+                    new CustomElevation(
+                        child: new Card(
+                        elevation:0,
+                        child: new Padding(
+                            padding:EdgeInsets.all(10),
+                            child:new Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: BuildColumn()
+                            children: BuildColumn())
                         )
+                    ),
+                        height:60,
+                        padding:EdgeInsets.all(5)
                     )
                 }
             )
@@ -66,8 +75,11 @@ namespace MikuMikuManager.App
         /// <returns>The <see cref="List{Widget}"/>.</returns>
         private List<Widget> BuildColumn()
         {
-            var list = new List<Widget>();
-            list.Add(new Text("Watched Folders"));
+            var list = new List<Widget>
+            {
+                new Text("Watched Folders")
+            };
+
             if (list.Count != 0)
             {
                 list.AddRange(chips);
@@ -107,20 +119,36 @@ namespace MikuMikuManager.App
                         {
                             // Add specified pmx chip
                             var specified = MMMServices.Instance.SpecifiedMmdObjects
-                                .Select(f => new Chip(
-                                    label: new Text(f.FileName),
-                                    deleteIcon: new Icon(Icons.delete),
-                                    onDeleted: () => MMMServices.Instance.SpecifiedMmdObjects.Remove(f)))
+                                .Select(f => new CustomElevation(
+                                    child: new Chip(
+                                        label: new Text(f.FileName),
+                                        deleteIcon: new Icon(Icons.delete),
+                                        onDeleted: () => MMMServices.Instance.SpecifiedMmdObjects.Remove(f),
+                                        backgroundColor: Colors.white,
+                                        deleteIconColor: Colors.red,
+                                        shape: new RoundedRectangleBorder(borderRadius: BorderRadius.circular(17))
+                                    ),
+                                    height: 30,
+                                    padding: EdgeInsets.symmetric(horizontal: 6)
+                                    ))
                                 .ToList();
 
                             // Add folder chip
                             var folders = MMMServices.Instance.WatchedFolders
-                                .Select(f => new Chip(
-                                    label: new Text(f),
-                                    deleteIcon: new Icon(Icons.delete),
-                                    onDeleted: () => MMMServices.Instance.WatchedFolders.Remove(f)))
+                                .Select(f => new CustomElevation(
+                                    child: new Chip(
+                                        label: new Text(f.Split('\\').Last()),
+                                        deleteIcon: new Icon(Icons.delete),
+                                        onDeleted: () => MMMServices.Instance.WatchedFolders.Remove(f),
+                                        backgroundColor: Colors.white,
+                                        deleteIconColor: Colors.red,
+                                        shape: new RoundedRectangleBorder(borderRadius: BorderRadius.circular(17))
+                                    ),
+                                    height: 30,
+                                    padding: EdgeInsets.symmetric(horizontal: 6)
+                                    ))
                                 .ToList();
-                            
+
                             chips.Clear();
                             chips.AddRange(specified);
                             chips.AddRange(folders);

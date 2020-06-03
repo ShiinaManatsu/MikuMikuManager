@@ -29,7 +29,15 @@ namespace MikuMikuManager.App
 								color: Unity.UIWidgets.ui.Color.fromARGB(255, 33, 211, 211));
 
 		private Widget BuildContentText(string content, int fontSize = 20) => new Text(content,
-			style: new TextStyle(fontSize: fontSize, color: Colors.black),
+			style: new TextStyle(fontSize: fontSize, color: Colors.black,
+				shadows: new List<BoxShadow> {
+					new BoxShadow(
+						color:Colors.red,
+						offset:new Unity.UIWidgets.ui.Offset(0,0),
+						blurRadius:5,
+						spreadRadius:5
+					)
+				}),
 			textAlign: Unity.UIWidgets.ui.TextAlign.center);
 
 		public override Widget build(BuildContext context) => new Scaffold(

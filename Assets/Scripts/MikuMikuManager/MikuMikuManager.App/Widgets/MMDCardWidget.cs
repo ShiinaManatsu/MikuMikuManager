@@ -99,9 +99,11 @@ namespace MikuMikuManager.App
                 child: _mmdObject.PreviewPath.Value != string.Empty && File.Exists(_mmdObject.PreviewPath.Value)
                     ? new Card(
                         color: Colors.blueAccent,
+                        elevation: 0,
                         child: Image.memory(File.ReadAllBytes(_mmdObject.PreviewPath.Value), fit: BoxFit.cover))
                     : new Card(
                         color: Colors.blueAccent,
+                        elevation: 0,
                         child: new Center(child: new Icon(Icons.priority_high))
                     )
                 ,

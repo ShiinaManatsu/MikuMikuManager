@@ -1,15 +1,10 @@
-﻿using MikuMikuManager.Services;
-using System.Collections.Generic;
-using UniRx;
-using Unity.UIWidgets.animation;
+﻿using UniRx;
 using Unity.UIWidgets.engine;
 using Unity.UIWidgets.material;
 using Unity.UIWidgets.painting;
-using Unity.UIWidgets.rendering;
 using Unity.UIWidgets.ui;
 using Unity.UIWidgets.widgets;
 using UnityEngine;
-using Color = Unity.UIWidgets.ui.Color;
 
 /// <summary>
 /// Flutter application namespace
@@ -39,7 +34,7 @@ namespace MikuMikuManager.App
             FontManager.instance.addFont(Resources.Load<Font>(path: "Fonts/MATERIALICONS-REGULAR"), "Material Icons");
             base.OnEnable();
         }
-        
+
         public static ReactiveProperty<string> SearchPattern { get; set; } = new ReactiveProperty<string>(string.Empty);
 
         public static ReactiveProperty<SortType> SortTypeProperty { get; set; } =
@@ -52,7 +47,7 @@ namespace MikuMikuManager.App
                 switch (settings.name)
                 {
                     case Routes.HomePageRouteText:
-                        screen = new AppContainer(SearchPattern,SortTypeProperty);
+                        screen = new AppContainer(SearchPattern, SortTypeProperty);
                         break;
                     case Routes.PreviewPageRouteText:
                         screen = new ItemPreviewPage();
@@ -75,9 +70,9 @@ namespace MikuMikuManager.App
             theme: new ThemeData(
                 pageTransitionsTheme: new PageTransitionsTheme(
                     builder: new FadeUpwardsPageTransitionsBuilder()
-                )
+                ),
+                primarySwatch: Colors.green
             )
-            //theme:ThemeData.dark()
         );
     }
 }
