@@ -3,7 +3,6 @@ using Unity.UIWidgets.animation;
 using Unity.UIWidgets.material;
 using Unity.UIWidgets.painting;
 using Unity.UIWidgets.rendering;
-using Unity.UIWidgets.ui;
 using Unity.UIWidgets.widgets;
 using UnityEngine;
 
@@ -29,15 +28,14 @@ namespace MikuMikuManager.App
 								fontSize: 30,
 								color: Unity.UIWidgets.ui.Color.fromARGB(255, 33, 211, 211));
 
-		private static TextStyle ContentStyle = new TextStyle(
-								fontSize: 20,
-								color: Colors.black);
-
-		private Widget BuildContentText(string content) => new Text(content, style: ContentStyle, textAlign: Unity.UIWidgets.ui.TextAlign.center);
+		private Widget BuildContentText(string content, int fontSize = 20) => new Text(content,
+			style: new TextStyle(fontSize: fontSize, color: Colors.black),
+			textAlign: Unity.UIWidgets.ui.TextAlign.center);
 
 		public override Widget build(BuildContext context) => new Scaffold(
-			appBar:new AppBar(title:new Text("About MikuMikuManager")),
-			body:new Center(
+			appBar: new AppBar(title: new Text("About MikuMikuManager")),
+			body: new SingleChildScrollView(
+				child: new Center(
 				child: new Container(
 					width: Screen.width * 0.8f,
 						child: new Column(
@@ -69,10 +67,30 @@ namespace MikuMikuManager.App
 										{
 											new TextSpan(text:Application.version,style:new TextStyle(color:Colors.green.shade900))
 										})
-									)
+									),
+								new SizedBox(height: 10),	// Spacing
+
+								// Credits
+								BuildContentText("Credits",fontSize:30),
+								new SizedBox(height: 20),	// Spacing
+								
+								BuildContentText("mmd-for-unity 2.1b BSD 3-Clause \"New\" or \"Revised\" License"),
+								new SizedBox(height: 20),	// Spacing
+
+								BuildContentText("UniRx - MIT License"),
+								new SizedBox(height: 20),	// Spacing
+
+								BuildContentText("StandaloneFileBrowser - MIT License"),
+								new SizedBox(height: 20),	// Spacing
+
+								BuildContentText("UnityWindowsFileDrag-Drop - MIT License"),
+								new SizedBox(height: 20),	// Spacing
+
+
 							})
 
 					)
+				)
 				)
 			);
 	}
