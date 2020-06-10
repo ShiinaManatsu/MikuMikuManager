@@ -63,18 +63,25 @@ public partial class PMXLoaderScript
 
     private PMXFormat Read()
     {
-        format_ = new PMXFormat();
-        format_.meta_header = CreateMetaHeader();
-        format_.header = ReadHeader();
-        format_.vertex_list = ReadVertexList();
-        format_.face_vertex_list = ReadFaceVertexList();
-        format_.texture_list = ReadTextureList();
-        format_.material_list = ReadMaterialList();
-        format_.bone_list = ReadBoneList();
-        format_.morph_list = ReadMorphList();
-        format_.display_frame_list = ReadDisplayFrameList();
-        format_.rigidbody_list = ReadRigidbodyList();
-        format_.rigidbody_joint_list = ReadRigidbodyJointList();
+        try
+        {
+            format_ = new PMXFormat();
+            format_.meta_header = CreateMetaHeader();
+            format_.header = ReadHeader();
+            format_.vertex_list = ReadVertexList();
+            format_.face_vertex_list = ReadFaceVertexList();
+            format_.texture_list = ReadTextureList();
+            format_.material_list = ReadMaterialList();
+            format_.bone_list = ReadBoneList();
+            format_.morph_list = ReadMorphList();
+            format_.display_frame_list = ReadDisplayFrameList();
+            format_.rigidbody_list = ReadRigidbodyList();
+            format_.rigidbody_joint_list = ReadRigidbodyJointList();
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log(e.Message);
+        }
         return format_;
     }
 

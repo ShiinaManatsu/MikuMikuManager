@@ -1,4 +1,4 @@
-﻿#define Unlit
+﻿//#define Unlit
 using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
@@ -552,6 +552,7 @@ namespace MMD
             };
             result.SetTexture("_BaseColorMap", main_texture);
             result.SetVector("_BaseColor", material.diffuse_color);
+            result.SetFloat("_Smoothness", 0f);
             result.SetFloat("_TransparentSortPriority", material_index);
             result.name = format_.material_list.material[material_index].name;
             return result;
