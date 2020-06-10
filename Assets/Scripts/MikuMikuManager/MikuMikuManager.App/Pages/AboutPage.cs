@@ -20,8 +20,8 @@ namespace MikuMikuManager.App
 
 		private AnimationController AnimationController;
 
-		private static readonly string AboutTitle = "About MikuMikuManager!";
-		private static readonly string Thanks = "感谢尝试Alpha版本的MikuMikuManager!";
+		private static readonly string AboutTitle = "About MikuMikuManager";
+		private static readonly string Thanks = "感谢尝试Alpha版本的MikuMikuManager";
 		private static readonly string AlertContent = "当前预览需要配合MikuMikuPreview或者将预览文件命名为\"模型名字\".pmx.png并与pmx文件放在同一目录";
 
 		private static TextStyle TitleStyle = new TextStyle(
@@ -42,8 +42,8 @@ namespace MikuMikuManager.App
 
 		public override Widget build(BuildContext context) => new Scaffold(
 			appBar: new AppBar(title: new Text("About MikuMikuManager")),
-			body: new SingleChildScrollView(
-				child: new Center(
+			body: new Center(
+				child: new SingleChildScrollView(
 				child: new Container(
 					width: Screen.width * 0.8f,
 						child: new Column(
@@ -82,7 +82,7 @@ namespace MikuMikuManager.App
 								BuildContentText("Credits",fontSize:30),
 								new SizedBox(height: 20),	// Spacing
 								
-								BuildContentText("mmd-for-unity 2.1b BSD 3-Clause \"New\" or \"Revised\" License"),
+								BuildContentText("mmd-for-unity 2.1b - BSD 3-Clause \"New\" or \"Revised\" License"),
 								new SizedBox(height: 20),	// Spacing
 
 								BuildContentText("UniRx - MIT License"),
