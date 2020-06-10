@@ -26,8 +26,9 @@ namespace PreviewBuilder
                 //PMX読み込みを試みる
                 pmx_format = PMXLoaderScript.Import(model_agent.file_path_);
             }
-            catch
+            catch(Exception e)
             {
+                Debug.Log(e.Message);
                 //PMXとして読み込めなかったら
                 //PMDとして読み込む
                 var pmd_format = PMDLoaderScript.Import(model_agent.file_path_);
